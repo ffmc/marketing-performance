@@ -5,7 +5,7 @@
 - The simulator is deterministic (fixed seed): the same date always produces the same files.
 
 ## How records arrive
-Each object is extracted daily on `SystemModstamp`, so a record is delivered again on every day it changes, as its full current state. Every raw table has the same columns as in `saas-revenue-analytics`: `RAW` (VARIANT), `_FILE`, `_FILE_ROW`, `_LOADED_AT`.
+Each object is extracted daily on `SystemModstamp`, so a record is delivered again on every day it changes, as its full current state. ECB reference rates land in `RAW.ECB.RATES` and the simulator's answer key in `RAW.GROUND_TRUTH.CAMPAIGN_PIPELINE_MONTHLY`. Every raw table has the same columns as in `saas-revenue-analytics`: `RAW` (VARIANT), `_FILE`, `_FILE_ROW`, `_LOADED_AT`.
 
 ## Tables
 
@@ -17,6 +17,7 @@ Each object is extracted daily on `SystemModstamp`, so a record is delivered aga
 | `RAW.SALESFORCE.CONTACTS` | contact × day it changed | `Id`, `AccountId`, `Email`, `LeadSource` |
 | `RAW.SALESFORCE.ACCOUNTS` | account × day it changed | `Id`, `Name`, `BillingCountry`, `Industry`, `NumberOfEmployees` |
 | `RAW.SALESFORCE.OPPORTUNITIES` | opportunity × day it changed | `Id`, `AccountId`, `CampaignId`, `StageName`, `Amount`, `CurrencyIsoCode`, `CloseDate`, `IsClosed`, `IsWon`, `OwnerId` |
+| `RAW.SALESFORCE.OPPORTUNITY_CONTACT_ROLES` | contact role × day it changed | `Id`, `OpportunityId`, `ContactId`, `Role`, `IsPrimary` |
 | `RAW.SALESFORCE.OPPORTUNITY_HISTORY` | stage change | `Id`, `OpportunityId`, `StageName`, `Amount`, `CreatedDate` |
 | `RAW.SALESFORCE.USERS` | sales rep | `Id`, `Name`, `UserRoleId`, `IsActive` |
 
@@ -30,3 +31,6 @@ Each object is extracted daily on `SystemModstamp`, so a record is delivered aga
 7. **Currencies.** Opportunity amounts are in EUR, GBP or USD (`CurrencyIsoCode`), converted with ECB rates.
 8. **Picklist change.** The `Lead.Status` value `Working` is renamed `Contacted` partway through history, so both values exist.
 9. **Deleted records.** Merged and deleted leads arrive with `IsDeleted = true`.
+10. **Missing response dates.** About 1% of responded members have no `FirstRespondedDate`.
+11. **Touches after the deal.** People keep responding to campaigns after their opportunity is created; those touches must not get credit.
+12. **Opportunities without contact roles.** A few opportunities have no contact role and fall back to `Opportunity.CampaignId` or `Unattributed`.

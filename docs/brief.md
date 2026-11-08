@@ -12,12 +12,14 @@ Fieldnote (the same B2B team-planning SaaS as `saas-revenue-analytics`) spends o
 3. **Cost efficiency.** Cost per lead, cost per MQL, cost per opportunity and pipeline-to-spend ratio for every campaign with a budget.
 4. **Velocity.** Days from lead to MQL, MQL to opportunity, and opportunity to close, plus time spent in each opportunity stage.
 5. **Pipeline health.** Open pipeline by stage, stalled opportunities (no stage change in 30 days) and stage regressions.
-6. **Trust.** Daily refresh orchestrated end to end, data quality tests that stop bad data before it reaches a report, and every metric defined once in `metrics.md`.
+6. **Touchpoints.** Which campaigns touch a deal before it's created, and how pipeline credit shifts between first touch, last touch and linear, so I can see which campaigns source deals and which only assist them.
+7. **Trust.** Daily refresh orchestrated end to end, data quality tests that stop bad data before it reaches a report, and every metric defined once in `metrics.md`.
 
 ## Non-goals
-Multi-touch attribution models, forecasting, real-time data, ad platform spend ingestion (costs come from the Salesforce campaign record).
+Custom or data-driven attribution models (rule-based first touch, last touch and linear only), forecasting, real-time data, ad platform spend ingestion (costs come from the Salesforce campaign record).
 
 ## What would make this a failure even if it works
 - Pipeline counted twice because a lead sat in two campaigns.
+- An attribution model whose campaign totals don't add up to company pipeline.
 - A conversion rate on screen that isn't defined in `metrics.md`.
 - A refresh that needs someone to run it by hand.

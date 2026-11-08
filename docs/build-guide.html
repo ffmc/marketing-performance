@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build guide — Marketing performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-primary:#1A1D19; --color-on-primary:#F3F4F0;
+  --color-surface:#F3F4F0; --color-surface-raised:#FBFBF8; --color-surface-sunken:#E9EBE5;
+  --color-text-primary:#1A1D19; --color-text-secondary:#4F564D; --color-text-muted:#6A7167;
+  --color-border:#D9DCD4; --color-border-strong:#B9BEB3; --color-focus-ring:#345E91; --color-warning:#87620F;
+  --ink-fundamentals:#4A5249; --ink-aggregation:#87620F; --ink-joins:#345E91; --ink-setops:#1F6B6B; --ink-ctes:#7A3E6E;
+  --ink-window:#A4461F; --ink-dates:#4E6B24; --ink-strings:#6B6420; --ink-modeling:#9C3434; --ink-quality:#3F5A6E;
+  --ink-wash-pct:14%;
+  --elevation-sm:0 1px 0 #D9DCD4, 0 6px 16px -10px rgba(26,29,25,0.25);
+  --font-display:"Bricolage Grotesque", ui-sans-serif, sans-serif;
+  --font-body:"IBM Plex Sans", ui-sans-serif, sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, monospace;
+  --type-xs-size:0.75rem; --type-sm-size:0.875rem; --type-md-size:1rem; --type-lg-size:1.333rem;
+  --type-xl-size:1.777rem; --type-2xl-size:2.369rem; --type-3xl-size:3.157rem; --type-code-size:0.8125rem;
+  --space-2xs:0.25rem; --space-xs:0.5rem; --space-sm:0.75rem; --space-md:1rem; --space-lg:1.5rem; --space-xl:2.5rem; --space-2xl:4rem;
+  --measure:68ch;
+  --radius-sm:4px; --radius-md:10px; --radius-full:999px;
+  --motion:150ms cubic-bezier(0.2,0,0,1);
+  --hit-area:44px;
+}
+[data-theme="dark"] {
+  --color-primary:#E6E9E3; --color-on-primary:#121513;
+  --color-surface:#121513; --color-surface-raised:#1A1E1B; --color-surface-sunken:#0D0F0E;
+  --color-text-primary:#E6E9E3; --color-text-secondary:#A9B0A5; --color-text-muted:#868D83;
+  --color-border:#2A302B; --color-border-strong:#3B423C; --color-focus-ring:#8FB0DB; --color-warning:#D9AE52;
+  --ink-fundamentals:#B3BCB0; --ink-aggregation:#D9AE52; --ink-joins:#8FB0DB; --ink-setops:#6CC0BC; --ink-ctes:#D095C2;
+  --ink-window:#E58A62; --ink-dates:#9DBF6A; --ink-strings:#C7BD6A; --ink-modeling:#E88A84; --ink-quality:#93B2C9;
+  --elevation-sm:0 1px 0 #2A302B, 0 6px 16px -10px rgba(0,0,0,0.6);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 88px; }
+body { margin: 0; background: var(--color-surface); color: var(--color-text-primary); font: 400 var(--type-md-size)/1.6 var(--font-body); }
+a { color: var(--ink-joins); text-underline-offset: 2px; }
+code { font: var(--type-code-size)/1.55 var(--font-mono); background: var(--color-surface-sunken); padding: 0.1em 0.35em; border-radius: var(--radius-sm); }
+:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+header { position: sticky; top: 0; z-index: 10; background: var(--color-surface); border-bottom: 1px solid var(--color-border); transition: box-shadow var(--motion); }
+header.scrolled { box-shadow: var(--elevation-sm); }
+.bar { max-width: 1200px; margin: 0 auto; padding: var(--space-sm) var(--space-lg); display: flex; align-items: center; gap: var(--space-md); }
+.bar h1 { font: 800 var(--type-lg-size)/1.25 var(--font-display); letter-spacing: -0.01em; margin: 0; white-space: nowrap; }
+.progress { flex: 1; display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.track { flex: 1; height: 6px; background: var(--color-surface-sunken); border-radius: var(--radius-full); overflow: hidden; }
+.fill { height: 100%; background: var(--color-primary); width: 0; transition: width var(--motion); }
+.pct { font: 500 var(--type-xs-size)/1.45 var(--font-body); letter-spacing: 0.02em; color: var(--color-text-secondary); white-space: nowrap; }
+button { font: 500 var(--type-sm-size)/1 var(--font-body); color: var(--color-text-primary); background: var(--color-surface-raised); border: 1px solid var(--color-border-strong); border-radius: var(--radius-full); min-height: var(--hit-area); padding: 0 var(--space-md); cursor: pointer; transition: background-color var(--motion); }
+button:hover { background: var(--color-surface-sunken); }
+#theme { width: var(--hit-area); padding: 0; display: grid; place-items: center; }
+
+.layout { max-width: 1200px; margin: 0 auto; padding: var(--space-xl) var(--space-lg) var(--space-2xl); display: grid; grid-template-columns: 240px 1fr; gap: var(--space-xl); }
+nav { position: sticky; top: 96px; align-self: start; max-height: calc(100vh - 120px); overflow-y: auto; }
+nav ol { list-style: none; margin: 0; padding: 0; }
+nav a { display: grid; grid-template-columns: 1.75rem 1fr auto; align-items: center; gap: var(--space-xs); min-height: 36px; padding: 0 var(--space-xs); border-radius: var(--radius-sm); color: var(--color-text-secondary); text-decoration: none; font-size: var(--type-sm-size); }
+nav a:hover { background: var(--color-surface-sunken); color: var(--color-text-primary); }
+nav a.current { color: var(--color-text-primary); font-weight: 600; background: var(--color-surface-sunken); }
+nav .num { font: 400 var(--type-code-size) var(--font-mono); color: var(--ink); }
+nav .count { font-size: var(--type-xs-size); color: var(--color-text-muted); }
+nav a.complete .name { text-decoration: line-through; text-decoration-color: var(--color-border-strong); }
+
+main { min-width: 0; }
+.intro { max-width: var(--measure); margin-bottom: var(--space-xl); }
+.intro h2 { font: 800 var(--type-3xl-size)/0.98 var(--font-display); letter-spacing: -0.035em; margin: 0 0 var(--space-lg); }
+.intro p { color: var(--color-text-secondary); margin: 0 0 var(--space-sm); }
+
+.part { font: 500 var(--type-xs-size)/1.45 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin: var(--space-2xl) 0 var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border); }
+
+details.phase { background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-lg); }
+details.phase > summary { list-style: none; cursor: pointer; padding: var(--space-lg); display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-md); align-items: baseline; }
+details.phase > summary::-webkit-details-marker { display: none; }
+summary .idx { font: 400 var(--type-code-size) var(--font-mono); color: var(--color-text-muted); }
+summary h3 { font: 800 var(--type-xl-size)/1.15 var(--font-display); letter-spacing: -0.02em; margin: 0; color: var(--ink); }
+summary .meta { display: block; font: 400 var(--type-sm-size)/1.5 var(--font-body); color: var(--color-text-muted); margin-top: var(--space-2xs); letter-spacing: 0; }
+summary .state { font-size: var(--type-xs-size); color: var(--color-text-muted); white-space: nowrap; }
+summary .chev { display: inline-block; margin-left: var(--space-xs); transition: transform var(--motion); }
+details[open] > summary .chev { transform: rotate(90deg); }
+.body { padding: 0 var(--space-lg) var(--space-lg); max-width: calc(var(--measure) + 2 * var(--space-lg)); }
+
+.goal { font-size: var(--type-md-size); margin: 0 0 var(--space-lg); }
+.block { margin-top: var(--space-lg); }
+.label { font: 500 var(--type-xs-size)/1.45 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 var(--space-xs); }
+.block.traps .label { color: var(--color-warning); }
+.block ul, .block ol { margin: 0; padding-left: 1.25rem; }
+.block li { margin-bottom: var(--space-2xs); }
+.block li ul { margin-top: var(--space-2xs); }
+
+ul.tasks { list-style: none; padding: 0; }
+ul.tasks > li { margin-bottom: var(--space-xs); }
+.check { display: grid; grid-template-columns: var(--hit-area) 1fr; align-items: start; cursor: pointer; border-radius: var(--radius-sm); }
+.check input { appearance: none; margin: 0; width: var(--hit-area); height: 28px; display: grid; place-items: center; cursor: pointer; }
+.check input::before { content: ""; width: 18px; height: 18px; border: 1.5px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-surface); transition: background-color var(--motion), border-color var(--motion); }
+.check input:checked::before { background: var(--color-primary); border-color: var(--color-primary); box-shadow: inset 0 0 0 3px var(--color-surface); }
+.check .text { padding-top: 2px; }
+.check input:checked + .text { color: var(--color-text-muted); }
+.check input:checked + .text > span.main { text-decoration: line-through; text-decoration-color: var(--color-border-strong); }
+.check .text ul { margin: var(--space-2xs) 0 0; padding-left: 1.25rem; }
+.n { font: 400 var(--type-code-size) var(--font-mono); color: var(--color-text-muted); margin-right: var(--space-2xs); }
+
+.block.done { background: var(--color-surface-sunken); border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; }
+.block.done .label { padding-left: var(--hit-area); }
+.block.talk { border-top: 1px solid var(--color-border); padding-top: var(--space-md); }
+.block.talk p { margin: 0; font-style: italic; color: var(--color-text-secondary); }
+.block p { margin: 0; }
+
+.flash { animation: flash 1.2s var(--motion); }
+@keyframes flash { from { background: color-mix(in srgb, var(--ink) var(--ink-wash-pct), transparent); } }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { position: static; max-height: none; }
+  .bar h1 { display: none; }
+  .intro h2 { font-size: var(--type-2xl-size); }
+}
+@media print {
+  header, nav { display: none; }
+  .layout { display: block; }
+  details.phase { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header id="top">
+  <div class="bar">
+    <h1>Build guide</h1>
+    <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span class="pct" id="pct"></span></div>
+    <button id="next" type="button">Next step</button>
+    <button id="theme" type="button" aria-label="Toggle dark mode"></button>
+  </div>
+</header>
+<div class="layout">
+  <nav aria-label="Phases"><ol id="nav"></ol></nav>
+  <main id="main"></main>
+</div>
+
+<script type="text/plain" id="md"># Build guide
+
+The path from raw Salesforce extracts to a campaign pipeline dashboard, orchestrated with Airflow. Phases 0–2 are done for you; from phase 3 on, you build. Each phase lists what to learn first, the tasks, the traps, a check you can run, and what you'll say about it in an interview.
+
+It follows the same layering as `saas-revenue-analytics`: RAW as delivered, SILVER cleaned in Snowflake notebooks, dbt intermediate models and marts in GOLD. Read `brief.md`, `metrics.md` and `source-data.md` before phase 3. They are the requirements, and I'm the CMO who wrote them: bring questions about definitions to me before you model them.
+
+---
+
+## Phase 0 — Snowflake setup (done for you, 30 min to run)
+**Goal:** the Salesforce, ECB and answer-key tables exist in RAW, with the same roles and warehouses as the SaaS project.
+
+**Tasks**
+1. Run `snowflake/setup.sql` in a Snowsight worksheet (`docs/setup.md` has the steps). Every object uses `IF NOT EXISTS`, so it's safe on the SaaS account.
+2. Read the new blocks: `RAW.SALESFORCE`, the contact roles table and `RAW.GROUND_TRUTH.CAMPAIGN_PIPELINE_MONTHLY`.
+
+**Done when:** `SHOW TABLES IN SCHEMA RAW.SALESFORCE` lists the 9 raw tables.
+
+**Interview talking point:** "Both projects share one account with three roles and three warehouses, so loading, transforming and reporting are separated and costed on their own. A resource monitor caps credits for the whole portfolio."
+
+## Phase 1 — Salesforce simulator (done for you)
+**Goal:** deterministic daily Salesforce extracts with every quirk in `source-data.md`, plus an answer key.
+
+**Tasks**
+1. Run `python simulator/simulate.py --backfill` and open a few files in `landing/salesforce/`. Pick one lead `Id` and follow it through `leads/`, `campaign_members/` and, if it converted, `contacts/` and `opportunities/`.
+2. Open `landing/ground_truth/campaign_pipeline_monthly.csv`: pipeline by campaign, month, currency and attribution model. Read `answer_key()` in `simulate.py` next to the Touchpoints section of `metrics.md`.
+
+**Done when:** you can explain why the same lead appears in several daily files.
+
+**Interview talking point:** "The source is simulated but follows the Salesforce API shape, and it computes its own answer key from the metric definitions. That gives me a reconciliation test that would catch a wrong join, which tests on the models alone can't."
+
+## Phase 2 — Raw load (done for you, 15 min to run)
+**Goal:** every raw table populated, re-runs load nothing new.
+
+**Tasks:** follow the quickstart in `docs/setup.md`: simulator backfill, `python ingestion/fx.py --backfill`, then `python ingestion/load.py`. In Snowsight, run `SELECT RAW FROM RAW.SALESFORCE.OPPORTUNITIES LIMIT 20` and click into the JSON.
+
+**Done when:** every table in `RAW.SALESFORCE` has rows and a second `load.py` run reports 0 rows loaded.
+
+**Interview talking point:** "Raw lands as VARIANT exactly as delivered, with file name and row number. COPY INTO skips files it already loaded, so the daily run is safe to repeat."
+
+---
+
+## Phase 3 — Silver notebooks (week 1, ~8 h)
+**Goal:** one typed, deduplicated table per Salesforce object in `SILVER.SALESFORCE`, plus `SILVER.ECB.RATES`. Full delivery history, no business logic.
+
+**Learn first**
+- Snowflake semi-structured data: `:` path syntax and `::` casts: https://docs.snowflake.com/en/user-guide/querying-semistructured
+- Salesforce object reference for Lead, CampaignMember and Opportunity: https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/
+- SQL drills: `ROW_NUMBER`, `QUALIFY`, dedup.
+
+**Tasks**
+1. One notebook, `snowflake/notebooks/silver/silver.ipynb`, with a section per object: `CREATE OR REPLACE TABLE SILVER.SALESFORCE.<OBJECT>` from RAW, followed by a check cell.
+2. Keep one row per record per delivery, with `delivered_on` parsed from `_FILE`. Remove exact duplicates on (`Id`, `delivered_on`).
+3. Cast every field to its type: timestamps to `TIMESTAMP_TZ`, dates to `DATE`, amounts and costs to `NUMBER(18,2)`, booleans to `BOOLEAN`. Use snake_case column names.
+4. Map the picklist rename: a `lead_status` column where `Working` becomes `Contacted`, and keep the original as `lead_status_raw`.
+5. Keep `is_deleted` as a column. Don't filter deleted records in Silver.
+6. `SILVER.ECB.RATES`: one row per currency and date, deduplicated across overlapping files.
+7. Check cells that fail the run: ids not null, `lead_status` and `stage_name` in the expected set, currencies in EUR/GBP/USD, no duplicates on the dedup grain.
+
+**Traps**
+- Order history by `delivered_on` then `_FILE_ROW`, never by `_LOADED_AT`.
+- `OPPORTUNITY_HISTORY` is append-only, not re-delivered state. Its grain is the history `Id`, not `Id` + delivery.
+- `FirstRespondedDate` is a date and `CreatedDate` a timestamp. Don't cast them to the same type and lose the time.
+- `CampaignMember.ContactId` gets filled in when the lead converts, so the same member has a NULL and then a non-NULL `ContactId` across deliveries.
+
+**Done when:** the notebook runs top to bottom with no failed checks, and `SELECT COUNT(DISTINCT lead_status) FROM SILVER.SALESFORCE.LEADS` doesn't include `Working`.
+
+**Interview talking point:** "Silver keeps the full delivery history because Salesforce re-sends the whole record on every change. Choosing the current state is a modeling decision, so it happens in dbt, where it's tested."
+
+## Phase 4 — dbt project and sources (week 2, ~4 h)
+**Goal:** every Silver table declared as a dbt source, documented and tested.
+
+**Learn first**
+- Sources and freshness: https://docs.getdbt.com/docs/build/sources
+- Data tests: https://docs.getdbt.com/docs/build/data-tests
+- `dbt_expectations`: https://hub.getdbt.com/metaplane/dbt_expectations/latest/
+
+**Tasks**
+1. `profiles.yml` with `dev` (your user, role TRANSFORMER, database GOLD, schema `DBT_<YOU>`) and `ci` (DBT_USER, key-pair auth, schema CI). Keep it out of git.
+2. `models/sources/_salesforce__sources.yml` and `_ecb__sources.yml`, with descriptions copied from `source-data.md`.
+3. Tests: `not_null` on ids, `unique` on the dedup grain, `accepted_values` on statuses, stages, campaign types and currencies.
+4. Freshness on `delivered_on` (warn after 1 day, error after 2).
+5. Add `dbt_expectations` to `packages.yml` and run `dbt deps`.
+
+**Traps**
+- Snowflake uppercases unquoted identifiers. Write names in lowercase in YAML.
+- A unique test on `Id` alone fails in Silver by design. The grain is `Id` + `delivered_on`.
+
+**Done when:** `dbt debug` passes and `dbt test --select source:*` is green.
+
+**Interview talking point:** "The sources document the quirks of the feed, like the picklist rename and conversions, so the next person knows about them before writing a join."
+
+## Phase 5 — Intermediate models (weeks 3–4, ~12 h)
+**Goal:** current state of every record, one row per person, and every touchpoint, ready for the marts.
+
+**Learn first**
+- dbt intermediate models: https://docs.getdbt.com/best-practices/how-we-structure/3-intermediate
+- SQL drills: window functions over partitions, `QUALIFY`, `LAG`, self-joins.
+- The Attribution and Touchpoints sections of `metrics.md`, line by line.
+
+**Tasks**
+1. `int_<object>__current`: latest delivery per `Id`, excluding `is_deleted`, for campaigns, members, leads, contacts, accounts, opportunities and contact roles.
+2. `int_lead_status_history`: one row per lead and status change, with the first date each lead reached MQL and SQL.
+3. `int_people`: one row per person (lowercase email), linking duplicate leads, the converted contact, account and opportunity.
+4. `int_touchpoints`: one row per person and campaign with `HasResponded`, dated by `FirstRespondedDate` or the member's `CreatedDate`, earliest response kept.
+5. `int_opportunity_touchpoints`: touchpoints of every contact role on each opportunity, on or before its creation date, with a position (first, middle, last) and the linear share.
+6. `int_source_campaign`: one source campaign per person and per opportunity, following the fallback order in `metrics.md`.
+7. `int_opportunity_stage_history`: history with stage sort order, previous stage, days in stage and a regression flag.
+
+**Traps**
+- A member links to a lead before conversion and to a lead *and* a contact after. Resolve the person by email, not by whichever id is filled.
+- Two duplicate leads can respond to the same campaign: one touchpoint, not two. Otherwise linear credit gives that campaign double weight.
+- Touches after the opportunity's creation date look like good engagement but must not get credit.
+- An opportunity can have no primary role but an influencer role. Read the fallback rules again before you assume first touch and last touch use the same contacts.
+
+**Done when:** for every opportunity, the sum of linear shares in `int_opportunity_touchpoints` is exactly 1, or the opportunity has no touchpoints.
+
+**Interview talking point:** "The hardest part was identity: a person is a lead, sometimes a duplicate lead, then a contact. Once I resolved people by email, attribution became a join instead of a set of special cases."
+
+## Phase 6 — Marts (week 5, ~8 h)
+**Goal:** the tables behind every page of the brief, in EUR.
+
+**Learn first**
+- dbt marts: https://docs.getdbt.com/best-practices/how-we-structure/4-marts
+- Kimball facts and dimensions, grain first.
+- The Revenue, Cost and Velocity sections of `metrics.md`.
+
+**Tasks**
+1. `dim_campaigns` (with cost and a `has_cost` flag) and `dim_accounts`.
+2. `fct_opportunities`: current state, amount in original currency and EUR, source campaign, stalled flag.
+3. `fct_opportunity_stage_history` from the intermediate model.
+4. `fct_campaign_funnel`: one row per campaign and person with the date of each funnel stage reached.
+5. `fct_touchpoints`: one row per opportunity touchpoint with first-touch, last-touch and linear credit in EUR.
+6. `mart_campaign_performance`: one row per campaign and month with funnel counts, pipeline, won revenue, cost metrics and velocity.
+7. `mart_campaign_attribution`: one row per campaign, month and model, plus influenced pipeline and touches per opportunity.
+
+**Traps**
+- Convert with the ECB rate of the last business day on or before the date measured. Weekends and holidays have no rate.
+- Cost metrics with no cost are NULL, not zero, and not divided by zero.
+- Influenced pipeline doesn't add up across campaigns. Never put a total under it.
+
+**Done when:** `dbt build --select marts` passes and the first-touch pipeline in `mart_campaign_attribution` for one month equals the sum of `fct_opportunities` created that month.
+
+**Interview talking point:** "Every mart has one grain written in its description. Attribution has its own mart with the model as a column, so comparing first and last touch is a filter, not a new query."
+
+## Phase 7 — Data quality and tests (week 6, ~5 h)
+**Goal:** tests that stop the run before a wrong number reaches the dashboard.
+
+**Learn first**
+- Singular tests: https://docs.getdbt.com/docs/build/data-tests#singular-data-tests
+- Test severity and `store_failures`.
+
+**Tasks**
+1. Funnel counts never increase down the stages, per campaign and month.
+2. Every attribution model sums to total pipeline created and won revenue per month.
+3. No opportunity has first-touch credit in two campaigns.
+4. No touchpoint dated after its opportunity's creation gets credit.
+5. Reconciliation: `mart_campaign_attribution` in original currency matches `RAW.GROUND_TRUTH.CAMPAIGN_PIPELINE_MONTHLY` per campaign, month, model and currency, within 0.01.
+6. Cost metrics only where `has_cost` is true.
+7. Break an input on purpose (for example, drop the email dedup) and watch `dbt build` fail.
+
+**Traps**
+- Compare to the answer key in original currency. Comparing in EUR tests the FX join, not attribution.
+- Linear shares are fractions. Round only at the end.
+
+**Done when:** a deliberately broken input makes `dbt build` fail, and the fixed version passes.
+
+**Interview talking point:** "The reconciliation test compares my marts to an answer key computed independently from the same definitions. If duplicate leads double-count touches in linear attribution, the totals still add up but the reconciliation fails, so the bug never reaches the dashboard."
+
+## Phase 8 — Airflow orchestration (week 7, ~6 h)
+**Goal:** the whole refresh runs every day without anyone touching it.
+
+**Learn first**
+- Airflow DAGs, tasks and retries: https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html
+- Running Airflow locally with Docker Compose: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
+
+**Tasks**
+1. `airflow/dags/marketing_daily.py` with tasks: simulate, fx, load, refresh Silver, `dbt source freshness`, `dbt build`.
+2. Run Silver with `EXECUTE NOTEBOOK` from a Snowflake operator or a Python task.
+3. Retries (2, 5 minutes apart) and a failure callback that sends an alert.
+4. Pass `{{ ds }}` to the simulator as `--until` so backfills and reruns are deterministic.
+
+**Traps**
+- Don't put the private keys in the image. Mount them and read paths from environment variables.
+- `dbt build` must stop the run on a failed test. Don't set tests to warn to make the DAG green.
+
+**Done when:** three scheduled runs succeed in a row, and a run with a broken test stops before the marts update.
+
+**Interview talking point:** "The DAG treats tests as a gate: if reconciliation fails, the dashboard keeps yesterday's numbers instead of showing wrong ones."
+
+## Phase 9 — Documentation and dashboard (week 8, ~8 h)
+**Goal:** a dashboard with one page per objective in the brief, every metric defined in `metrics.md`.
+
+**Learn first**
+- Streamlit in Snowflake: https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit
+- `dbt docs generate` and model descriptions.
+
+**Tasks**
+1. Descriptions on every model and column. Generate dbt docs and take a lineage screenshot.
+2. Dashboard pages: funnel, pipeline by campaign and channel, cost efficiency, velocity, pipeline health, touchpoints.
+3. On the touchpoints page, show first touch, last touch and linear side by side, and influenced pipeline on its own, labelled.
+4. Every number on screen links or refers to its definition in `metrics.md`.
+
+**Done when:** I (the CMO) can answer every question in the README from the dashboard without asking you.
+
+**Interview talking point:** "The dashboard only shows metrics that are written down, so the budget meeting argues about decisions, not definitions."
+
+## Phase 10 — Showcase (week 9, ~3 h)
+**Goal:** a hiring manager understands the project in two minutes.
+
+**Tasks**
+1. README: business problem, architecture, lineage screenshot, design decisions and what's simulated.
+2. A 2–3 minute demo video: one campaign that looks strong on first touch and weaker on last touch, and why.
+3. Add the project to `job-hunting/Context/Master.xlsx`, then to the Analytics Engineer CV.
+
+**Done when:** someone who hasn't seen it can explain what it does after reading the README.
+</script>
+<script>
+const INKS = ["fundamentals","fundamentals","setops","window","joins","ctes","modeling","quality","dates","strings","aggregation"];
+const KEY = "marketing-build-guide-progress";
+const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function inline(s) {
+  const codes = [];
+  s = esc(s).replace(/`([^`]+)`/g, (_, c) => `\u0000${codes.push(c) - 1}\u0000`);
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/https?:\/\/[^\s),]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\/(www\.)?/, "")}</a>`);
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
+}
+
+function parseBlocks(lines) {
+  const blocks = [];
+  let cur = null;
+  for (const raw of lines) {
+    if (!raw.trim()) { cur = null; continue; }
+    const top = raw.match(/^(\d+\.|-) (.*)$/);
+    const sub = raw.match(/^\s+- (.*)$/);
+    if (top) {
+      if (!cur || cur.type !== "list") { cur = { type: "list", ordered: top[1] !== "-", items: [] }; blocks.push(cur); }
+      cur.items.push({ text: top[2], sub: [] });
+    } else if (sub && cur && cur.type === "list") {
+      cur.items[cur.items.length - 1].sub.push(sub[1]);
+    } else {
+      const lab = raw.match(/^\*\*([^*]+?):?\*\*:?\s*(.*)$/);
+      if (lab) { cur = { type: "labeled", label: lab[1].replace(/:$/, ""), text: lab[2] }; blocks.push(cur); if (!lab[2]) cur.wantsList = true; }
+      else if (cur && cur.type === "para") cur.text += " " + raw.trim();
+      else { cur = { type: "para", text: raw.trim() }; blocks.push(cur); }
+    }
+  }
+  const out = [];
+  for (const b of blocks) {
+    const prev = out[out.length - 1];
+    if (b.type === "list" && prev && prev.wantsList && !prev.list) { prev.list = b; continue; }
+    out.push(b);
+  }
+  return out;
+}
+
+function checkbox(id, html) {
+  return `<label class="check"><input type="checkbox" data-id="${id}"${state[id] ? " checked" : ""}><span class="text">${html}</span></label>`;
+}
+
+function renderList(list, pid, asTasks) {
+  if (!asTasks) {
+    const tag = list.ordered ? "ol" : "ul";
+    return `<${tag}>${list.items.map(i => `<li>${inline(i.text)}${i.sub.length ? `<ul>${i.sub.map(s => `<li>${inline(s)}</li>`).join("")}</ul>` : ""}</li>`).join("")}</${tag}>`;
+  }
+  return `<ul class="tasks">${list.items.map((i, n) => {
+    const sub = i.sub.length ? `<ul>${i.sub.map(s => `<li>${inline(s)}</li>`).join("")}</ul>` : "";
+    return `<li>${checkbox(`${pid}-t${n}`, `<span class="main"><span class="n">${n + 1}.</span>${inline(i.text)}</span>${sub}`)}</li>`;
+  }).join("")}</ul>`;
+}
+
+function renderPhase(heading, lines, pid) {
+  const m = heading.match(/^Phase (\d+) — (.+?)(?: \((.+)\))?$/);
+  const num = +m[1];
+  let goal = "", body = "";
+  for (const b of parseBlocks(lines)) {
+    if (b.type === "para") { body += `<div class="block"><p>${inline(b.text)}</p></div>`; continue; }
+    if (b.type === "list") { body += `<div class="block">${renderList(b, pid, false)}</div>`; continue; }
+    const L = b.label;
+    if (L === "Goal") { goal = `<p class="goal">${inline(b.text)}</p>`; continue; }
+    if (L === "Tasks") {
+      const content = b.list ? renderList(b.list, pid, true) : `<ul class="tasks"><li>${checkbox(`${pid}-t0`, `<span class="main">${inline(b.text)}</span>`)}</li></ul>`;
+      body += `<div class="block"><p class="label">Tasks</p>${content}</div>`;
+    } else if (L === "Done when") {
+      body += `<div class="block done"><p class="label">Done when</p>${checkbox(`${pid}-done`, `<span class="main">${inline(b.text)}</span>`)}</div>`;
+    } else if (L.startsWith("Interview")) {
+      body += `<div class="block talk"><p class="label">Interview talking point</p><p>${inline(b.text)}</p></div>`;
+    } else {
+      const cls = L === "Traps" ? "traps" : "";
+      body += `<div class="block ${cls}"><p class="label">${esc(L)}</p>${b.text ? `<p>${inline(b.text)}</p>` : ""}${b.list ? renderList(b.list, pid, false) : ""}</div>`;
+    }
+  }
+  return { num, title: m[2], meta: m[3] || "", html: goal + body };
+}
+
+const md = document.getElementById("md").textContent.trim().split("\n");
+const main = document.getElementById("main");
+const nav = document.getElementById("nav");
+const sections = [];
+let introLines = [], cur = null, partBreak = false;
+for (const line of md) {
+  if (line.startsWith("# ")) continue;
+  if (line.startsWith("## ")) { cur = { heading: line.slice(3), lines: [], partBreak }; sections.push(cur); partBreak = false; continue; }
+  if (line.trim() === "---") { if (cur) partBreak = true; continue; }
+  (cur ? cur.lines : introLines).push(line);
+}
+
+main.innerHTML = `<section class="intro"><h2>From Salesforce extracts to a campaign pipeline dashboard</h2>${parseBlocks(introLines).map(b => `<p>${inline(b.text)}</p>`).join("")}</section>`;
+sections.forEach((s, i) => {
+  const pid = `p${i}`;
+  const p = renderPhase(s.heading, s.lines, pid);
+  const ink = `var(--ink-${INKS[p.num] || "fundamentals"})`;
+  if (s.partBreak) main.insertAdjacentHTML("beforeend", `<p class="part">You build</p>`);
+  else if (i === 0) main.insertAdjacentHTML("beforeend", `<p class="part">Done for you</p>`);
+  main.insertAdjacentHTML("beforeend",
+    `<details class="phase" id="${pid}" style="--ink:${ink}"><summary><span class="idx">${String(p.num).padStart(2, "0")}</span><span><h3>${esc(p.title)}</h3>${p.meta ? `<span class="meta">${esc(p.meta)}</span>` : ""}</span><span class="state"><span data-count="${pid}"></span><span class="chev" aria-hidden="true">›</span></span></summary><div class="body">${p.html}</div></details>`);
+  nav.insertAdjacentHTML("beforeend",
+    `<li><a href="#${pid}" data-nav="${pid}" style="--ink:${ink}"><span class="num">${String(p.num).padStart(2, "0")}</span><span class="name">${esc(p.title)}</span><span class="count" data-count="${pid}"></span></a></li>`);
+});
+
+const phases = [...document.querySelectorAll("details.phase")];
+function phaseBoxes(d) { return [...d.querySelectorAll("input[type=checkbox]")]; }
+function update() {
+  let all = 0, done = 0;
+  phases.forEach(d => {
+    const boxes = phaseBoxes(d), n = boxes.filter(b => b.checked).length;
+    all += boxes.length; done += n;
+    document.querySelectorAll(`[data-count="${d.id}"]`).forEach(el => el.textContent = `${n}/${boxes.length}`);
+    document.querySelector(`[data-nav="${d.id}"]`).classList.toggle("complete", n === boxes.length);
+  });
+  document.getElementById("fill").style.width = `${(done / all) * 100}%`;
+  document.getElementById("pct").textContent = `${done} of ${all} steps`;
+  const first = phases.find(d => phaseBoxes(d).some(b => !b.checked));
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("current", first && a.dataset.nav === first.id));
+}
+phases.forEach(d => { d.open = phaseBoxes(d).some(b => !b.checked) && d === phases.find(x => phaseBoxes(x).some(b => !b.checked)); });
+main.addEventListener("change", e => {
+  if (!e.target.dataset.id) return;
+  e.target.checked ? state[e.target.dataset.id] = 1 : delete state[e.target.dataset.id];
+  save(); update();
+});
+nav.addEventListener("click", e => { const a = e.target.closest("a"); if (a) document.getElementById(a.dataset.nav).open = true; });
+document.getElementById("next").addEventListener("click", () => {
+  const box = document.querySelector("details.phase input[type=checkbox]:not(:checked)");
+  if (!box) return;
+  const d = box.closest("details"); d.open = true;
+  const row = box.closest("li, .block");
+  row.scrollIntoView({ behavior: "smooth", block: "center" });
+  row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  row.style.setProperty("--ink", getComputedStyle(d).getPropertyValue("--ink"));
+});
+
+const root = document.documentElement, themeBtn = document.getElementById("theme");
+const sun = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const moon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function setTheme(t) { root.dataset.theme = t; themeBtn.innerHTML = t === "dark" ? sun : moon; }
+setTheme(localStorage.getItem("theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+themeBtn.addEventListener("click", () => { const t = root.dataset.theme === "dark" ? "light" : "dark"; localStorage.setItem("theme", t); setTheme(t); });
+addEventListener("scroll", () => document.getElementById("top").classList.toggle("scrolled", scrollY > 4), { passive: true });
+update();
+</script>
+</body>
+</html>

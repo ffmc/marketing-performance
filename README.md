@@ -4,7 +4,7 @@ A portfolio project that follows every marketing campaign at Fieldnote, a fictio
 
 Salesforce data lands in Snowflake, dbt cleans, models and tests it, and Airflow runs the whole refresh every day.
 
-**Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan and Snowflake setup. Next: the Salesforce data simulator, raw load, dbt models, data quality tests, the Airflow schedule and the dashboard (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
+**Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan, Snowflake setup, the Salesforce data simulator and the raw loader. Next: the Silver notebook, dbt models, data quality tests, the Airflow schedule and the dashboard (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
 
 ## The business case
 
@@ -20,6 +20,10 @@ The CMO's [brief](docs/brief.md) asks for a pipeline view by campaign that refre
 
 **Pipeline and revenue**
 - How much pipeline and won revenue did each campaign and channel create, by country and month, in euros?
+
+**Touchpoints**
+- Which campaigns touched each deal before it was created, and how many touches does a deal need?
+- How does each campaign's pipeline change between first touch, last touch and linear credit, and which campaigns assist deals more than they source them?
 
 **Spend**
 - What does a lead, a qualified lead and an opportunity cost for each campaign?
@@ -45,7 +49,7 @@ ECB exchange rates ───┴─> Snowflake RAW ─> SILVER (notebooks) ─> d
 
 | Step | What happens | Tools |
 |---|---|---|
-| Source data | A simulator writes daily Salesforce extracts (campaigns, campaign members, leads, contacts, accounts, opportunities, stage history), and real exchange rates come from the European Central Bank | Python |
+| Source data | A simulator writes daily Salesforce extracts (campaigns, campaign members, leads, contacts, accounts, opportunities, contact roles, stage history), and real exchange rates come from the European Central Bank | Python |
 | Raw load | Files land in Snowflake exactly as delivered, with the file name and row kept for traceability | Snowflake, Python |
 | Cleaning | One clean table per Salesforce object: correct types, duplicates removed, deleted records flagged, renamed picklist values aligned | Snowflake notebooks, SQL |
 | Modeling | Latest state of each record, duplicate leads merged, leads linked to their contacts and deals, one source campaign per lead and deal, then the marts behind each question | dbt, SQL |
@@ -68,7 +72,7 @@ ECB exchange rates ───┴─> Snowflake RAW ─> SILVER (notebooks) ─> d
 | `snowflake/` | Account setup (`setup.sql`) and the cleaning notebook |
 | `dbt/` | dbt project: sources, intermediate models and marts |
 | `airflow/` | The daily DAG |
-| `docs/` | [Brief](docs/brief.md), [metric definitions](docs/metrics.md), [source data](docs/source-data.md), [build guide](docs/build-guide.md), [setup](docs/setup.md) |
+| `docs/` | [Brief](docs/brief.md), [metric definitions](docs/metrics.md), [source data](docs/source-data.md), [build guide](docs/build-guide.md) (open [build-guide.html](docs/build-guide.html) in a browser to tick off steps), [setup](docs/setup.md) |
 
 Salesforce data is simulated. Exchange rates are real.
 

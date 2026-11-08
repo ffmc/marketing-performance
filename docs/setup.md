@@ -24,6 +24,7 @@ done
 **4. Generate and load data** (available after phases 1 and 2)
 ```bash
 python simulator/simulate.py --backfill   # Salesforce files, Jan 2024 to yesterday
+python ingestion/fx.py --backfill         # ECB exchange rates
 cp .env.example .env                      # then fill in SNOWFLAKE_ACCOUNT
 set -a; source .env; set +a
 python ingestion/load.py
