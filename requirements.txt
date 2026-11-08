@@ -1,0 +1,4 @@
+snowflake-connector-python>=3.12
+dbt-core>=1.8
+dbt-snowflake>=1.8
+apache-airflow>=2.9
