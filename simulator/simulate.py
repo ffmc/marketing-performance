@@ -172,7 +172,7 @@ class Sim:
         m = self.member(camp, day, t, lead=lead)
         lead["_members"] = [m["Id"]]
         if self.rng.random() < C.DUPLICATE_LEAD:
-            dt = t + timedelta(minutes=self.rng.randint(2, 3 * 24 * 60))
+            dt = t + timedelta(minutes=self.rng.randint(2, 180))
             dup = self.lead_record(dt, first, last, company, camp, email)
             dm = self.member(camp, dt.date(), dt, lead=dup)
             dup["_members"] = [dm["Id"]]
