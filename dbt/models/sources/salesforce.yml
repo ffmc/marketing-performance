@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: salesforce
+    description: Salesforce objects cleaned in Silver by snowflake/notebooks/silver/silver.ipynb. Full delivery history, one row per record per delivery.
+    database: silver
+    schema: salesforce
+    tables:
+      - name: users
+        description: One row per user per delivery. Sales reps; re-delivered when a rep is deactivated.
+      - name: accounts
+        description: One row per account per delivery. Created when a lead converts.
+      - name: campaigns
+        description: One row per campaign per delivery. Re-delivered as the status moves Planned → In Progress → Completed and when the actual cost is booked. Costs are in EUR; missing costs are kept as NULL.
+      - name: leads
+        description: One row per lead per delivery. Re-delivered on every status change. lead_status maps Working to Contacted; lead_status_raw keeps what Salesforce sent. About 2% are duplicates sharing an email under a different Id.
+      - name: contacts
+        description: One row per contact per delivery. Created when a lead converts; the lead's converted_contact_id points here.
+      - name: campaign_members
+        description: One row per membership per delivery. A lead can be in several campaigns; contact_id gets filled in when the lead converts.
+      - name: opportunities
+        description: One row per opportunity per delivery. Re-delivered on every stage change. amount is in currency (EUR, GBP or USD); campaign_id is the primary campaign source, the fallback when there's no contact role.
+      - name: opportunity_contact_roles
+        description: One row per contact role per delivery. Links the people on a deal to the opportunity. A few opportunities have no contact role.
+      - name: opportunity_history
+        description: One row per stage change. Append-only; the grain is the history Id, not Id + delivery. Has no last_modified_at. amount is in the opportunity's currency.
