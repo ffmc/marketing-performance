@@ -1,9 +1,0 @@
-sources:
-  - name: salesforce
-    description: Salesforce objects cleaned in Silver by snowflake/notebooks/silver/silver.ipynb. Full delivery history, one row per record per delivery.
-    database: silver
-    tables:
-      - name: accounts
-        description: One row per account per delivery. Created when a lead converts.
-      - name: campaign_members
-        description: One row per membership per delivery. A lead can be in several campaigns; contact_id gets filled in when the lead converts.
