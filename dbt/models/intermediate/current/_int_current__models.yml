@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: int_campaigns__current
+    description: One row per campaign, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: campaign_id
+        data_tests: [unique, not_null]
+
+  - name: int_campaign_members__current
+    description: One row per campaign membership, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: campaign_member_id
+        data_tests: [unique, not_null]
+
+  - name: int_leads__current
+    description: One row per lead, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: lead_id
+        data_tests: [unique, not_null]
+
+  - name: int_contacts__current
+    description: One row per contact, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: contact_id
+        data_tests: [unique, not_null]
+
+  - name: int_accounts__current
+    description: One row per account, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: account_id
+        data_tests: [unique, not_null]
+
+  - name: int_opportunities__current
+    description: One row per opportunity, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: opportunity_id
+        data_tests: [unique, not_null]
+
+  - name: int_opportunity_contact_roles__current
+    description: One row per opportunity contact role, its latest delivery. Records whose latest delivery is deleted are excluded.
+    columns:
+      - name: opportunity_contact_role_id
+        data_tests: [unique, not_null]
