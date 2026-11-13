@@ -1,0 +1,172 @@
+version: 2
+
+sources:
+  - name: salesforce
+    description: Salesforce objects cleaned in Silver by snowflake/notebooks/silver/silver.ipynb. Full delivery history, one row per record per delivery.
+    database: silver
+    schema: salesforce
+    config:
+      loaded_at_field: delivered_on
+      freshness:
+        warn_after: {count: 1, period: day}
+        error_after: {count: 2, period: day}
+    tables:
+      - name: users
+        description: One row per user per delivery. Sales reps; re-delivered when a rep is deactivated.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [user_id, delivered_on]
+        columns:
+          - name: user_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+
+      - name: accounts
+        description: One row per account per delivery. Created when a lead converts.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [account_id, delivered_on]
+        columns:
+          - name: account_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+
+      - name: campaigns
+        description: One row per campaign per delivery. Re-delivered as the status moves Planned → In Progress → Completed and when the actual cost is booked. Costs are in EUR; missing costs are kept as NULL.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [campaign_id, delivered_on]
+        columns:
+          - name: campaign_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+          - name: campaign_type
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Email, Paid Search, Webinar, Partner, Content, Event]
+          - name: campaign_status
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Planned, In Progress, Completed]
+
+      - name: leads
+        description: One row per lead per delivery. Re-delivered on every status change. lead_status maps Working to Contacted; lead_status_raw keeps what Salesforce sent. About 2% are duplicates sharing an email under a different Id.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [lead_id, delivered_on]
+        columns:
+          - name: lead_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+          - name: lead_status
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [New, Contacted, MQL, SQL, Unqualified, Converted]
+          - name: lead_status_raw
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [New, Working, Contacted, MQL, SQL, Unqualified, Converted]
+
+      - name: contacts
+        description: One row per contact per delivery. Created when a lead converts; the lead's converted_contact_id points here.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [contact_id, delivered_on]
+        columns:
+          - name: contact_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+
+      - name: campaign_members
+        description: One row per membership per delivery. A lead can be in several campaigns; contact_id gets filled in when the lead converts.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [campaign_member_id, delivered_on]
+        columns:
+          - name: campaign_member_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+          - name: campaign_id
+            data_tests: [not_null]
+          - name: member_status
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Sent, Responded]
+
+      - name: opportunities
+        description: One row per opportunity per delivery. Re-delivered on every stage change. amount is in currency (EUR, GBP or USD); campaign_id is the primary campaign source, the fallback when there's no contact role.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [opportunity_id, delivered_on]
+        columns:
+          - name: opportunity_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+          - name: account_id
+            data_tests: [not_null]
+          - name: stage_name
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Discovery, Demo, Proposal, Negotiation, Closed Won, Closed Lost]
+          - name: currency
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [EUR, GBP, USD]
+
+      - name: opportunity_contact_roles
+        description: One row per contact role per delivery. Links the people on a deal to the opportunity. A few opportunities have no contact role.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [opportunity_contact_role_id, delivered_on]
+        columns:
+          - name: opportunity_contact_role_id
+            data_tests: [not_null]
+          - name: delivered_on
+            data_tests: [not_null]
+          - name: opportunity_id
+            data_tests: [not_null]
+          - name: contact_id
+            data_tests: [not_null]
+
+      - name: opportunity_history
+        description: One row per stage change. Append-only; the grain is the history Id, not Id + delivery. Has no last_modified_at. amount is in the opportunity's currency.
+        columns:
+          - name: opportunity_history_id
+            data_tests: [not_null, unique]
+          - name: opportunity_id
+            data_tests: [not_null]
+          - name: stage_name
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Discovery, Demo, Proposal, Negotiation, Closed Won, Closed Lost]

@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: ecb
+    description: ECB reference rates cleaned in Silver by snowflake/notebooks/silver/silver.ipynb. Shared with saas-revenue-analytics.
+    database: silver
+    schema: ecb
+    tables:
+      - name: rates
+        description: One row per currency per business day. Units of currency per 1 EUR; GBP and USD only, EUR is the base. No rates on weekends or TARGET holidays.
+        config:
+          loaded_at_field: rate_on
+          freshness:
+            warn_after: {count: 4, period: day}
+            error_after: {count: 6, period: day}
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [currency, rate_on]
+        columns:
+          - name: currency
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [GBP, USD]
+          - name: rate_on
+            data_tests: [not_null]
+          - name: rate
+            data_tests: [not_null]
