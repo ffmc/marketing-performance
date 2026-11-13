@@ -14,6 +14,11 @@ sources:
       - name: users
         description: One row per user per delivery. Sales reps; re-delivered when a rep is deactivated.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [user_id, delivered_on]
@@ -26,6 +31,11 @@ sources:
       - name: accounts
         description: One row per account per delivery. Created when a lead converts.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [account_id, delivered_on]
@@ -34,13 +44,30 @@ sources:
             data_tests: [not_null]
           - name: delivered_on
             data_tests: [not_null]
+          - name: number_of_employees
+            data_tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
+                    strictly: true
 
       - name: campaigns
         description: One row per campaign per delivery. Re-delivered as the status moves Planned → In Progress → Completed and when the actual cost is booked. Costs are in EUR; missing costs are kept as NULL.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [campaign_id, delivered_on]
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: end_on
+                column_B: start_on
+                or_equal: true
         columns:
           - name: campaign_id
             data_tests: [not_null]
@@ -58,10 +85,27 @@ sources:
               - accepted_values:
                   arguments:
                     values: [Planned, In Progress, Completed]
+          - name: budgeted_cost
+            description: EUR. NULL when the campaign has no cost at all.
+            data_tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
+          - name: actual_cost
+            description: EUR. NULL until booked, and for some campaigns never booked.
+            data_tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
 
       - name: leads
         description: One row per lead per delivery. Re-delivered on every status change. lead_status maps Working to Contacted; lead_status_raw keeps what Salesforce sent. About 2% are duplicates sharing an email under a different Id.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [lead_id, delivered_on]
@@ -86,6 +130,11 @@ sources:
       - name: contacts
         description: One row per contact per delivery. Created when a lead converts; the lead's converted_contact_id points here.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [contact_id, delivered_on]
@@ -98,6 +147,11 @@ sources:
       - name: campaign_members
         description: One row per membership per delivery. A lead can be in several campaigns; contact_id gets filled in when the lead converts.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [campaign_member_id, delivered_on]
@@ -118,6 +172,11 @@ sources:
       - name: opportunities
         description: One row per opportunity per delivery. Re-delivered on every stage change. amount is in currency (EUR, GBP or USD); campaign_id is the primary campaign source, the fallback when there's no contact role.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [opportunity_id, delivered_on]
@@ -140,10 +199,29 @@ sources:
               - accepted_values:
                   arguments:
                     values: [EUR, GBP, USD]
+          - name: amount
+            data_tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
+                    strictly: true
+          - name: probability
+            data_tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  arguments:
+                    min_value: 0
+                    max_value: 100
 
       - name: opportunity_contact_roles
         description: One row per contact role per delivery. Links the people on a deal to the opportunity. A few opportunities have no contact role.
         data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
           - dbt_utils.unique_combination_of_columns:
               arguments:
                 combination_of_columns: [opportunity_contact_role_id, delivered_on]
@@ -159,6 +237,12 @@ sources:
 
       - name: opportunity_history
         description: One row per stage change. Append-only; the grain is the history Id, not Id + delivery. Has no last_modified_at. amount is in the opportunity's currency.
+        data_tests:
+          - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+              arguments:
+                column_A: system_modstamp_at
+                column_B: created_at
+                or_equal: true
         columns:
           - name: opportunity_history_id
             data_tests: [not_null, unique]
