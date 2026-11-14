@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: int_people
+    description: >
+      One row per person, identified by lowercased, trimmed email. The primary lead is the converted one,
+      else the earliest created, ties broken by lead_id. All lead ids are kept in lead_ids.
+      Leads and contacts without an email are excluded.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "converted_contact_id is null or contact_id is null or converted_contact_id = contact_id"
+    columns:
+      - name: email
+        data_tests: [unique, not_null]
+      - name: primary_lead_id
+        data_tests: [unique]
