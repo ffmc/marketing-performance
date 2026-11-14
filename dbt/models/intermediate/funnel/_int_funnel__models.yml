@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: int_lead_status_history
+    description: >
+      One row per lead and status change, rebuilt from Silver deliveries (Salesforce has no lead history table).
+      Consecutive deliveries with the same status are collapsed. Uses lead_status, so the Working/Contacted
+      rename is not a change. Leads deleted today are excluded entirely.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [lead_id, change_number]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "previous_status is distinct from lead_status"
+    columns:
+      - name: lead_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_leads__current')
+                field: lead_id
+      - name: changed_at
+        data_tests: [not_null]
+
+  - name: int_lead_milestones
+    description: >
+      One row per lead with the first time it reached MQL and SQL. SQL means status SQL or Converted.
+      Regressions (e.g. MQL, Unqualified, MQL) keep the first date. NULL when the lead never reached the stage.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "first_sql_at >= first_mql_at or first_sql_at is null or first_mql_at is null"
+    columns:
+      - name: lead_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_leads__current')
+                field: lead_id
