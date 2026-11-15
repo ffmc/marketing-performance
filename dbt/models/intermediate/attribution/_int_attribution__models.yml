@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: int_touchpoints
+    description: >
+      One row per person and campaign the person responded to. A member resolves to a person through its lead
+      (any of the person's lead_ids) or its contact. Dated by first_responded_on, or the member's created date when
+      that is null. When a person responded to a campaign more than once (e.g. through duplicate leads), the earliest
+      response is kept; ties broken by member created_at, then campaign_member_id.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [email, campaign_id]
+    columns:
+      - name: campaign_member_id
+        data_tests: [unique, not_null]
+      - name: email
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_people')
+                field: email
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_campaigns__current')
+                field: campaign_id
+      - name: touched_on
+        data_tests: [not_null]
