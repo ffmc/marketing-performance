@@ -30,3 +30,45 @@ models:
                 field: campaign_id
       - name: touched_on
         data_tests: [not_null]
+
+  - name: int_opportunity_touchpoints
+    description: >
+      One row per opportunity and touchpoint of a person on one of its contact roles, touched on or before the
+      opportunity's created date. Touches after that date are excluded. Ordered within the opportunity by touched_on,
+      then member created_at, then campaign_member_id. position is first, middle or last; an opportunity with a single
+      touchpoint has position first, so last touch should use touch_number = touch_count. linear_share is
+      1 / touch_count. Opportunities with no touchpoints have no rows.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [opportunity_id, campaign_member_id]
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [opportunity_id, touch_number]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "touched_on <= opportunity_created_on"
+    columns:
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_opportunities__current')
+                field: opportunity_id
+      - name: campaign_member_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_touchpoints')
+                field: campaign_member_id
+      - name: campaign_id
+        data_tests: [not_null]
+      - name: position
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [first, middle, last]
+      - name: linear_share
+        data_tests: [not_null]
