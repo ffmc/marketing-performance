@@ -41,3 +41,34 @@ models:
               arguments:
                 to: ref('int_leads__current')
                 field: lead_id
+
+  - name: int_opportunity_stage_history
+    description: >
+      One row per opportunity stage change, from the append-only OpportunityHistory, deleted rows excluded.
+      Ordered within the opportunity by created_at, then opportunity_history_id. stage_sort_order runs Discovery 1
+      to Negotiation 4; Closed Won and Closed Lost are both 5, so closing lost is never a regression. days_in_stage
+      is the days until the next row and is null for the opportunity's current stage. is_regression is true when
+      stage_sort_order is lower than the previous row's.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "days_in_stage >= 0"
+          config:
+            where: "days_in_stage is not null"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_current_stage = (days_in_stage is null)"
+    columns:
+      - name: opportunity_history_id
+        data_tests: [unique, not_null]
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_opportunities__current')
+                field: opportunity_id
+      - name: stage_sort_order
+        data_tests: [not_null]
+      - name: entered_at
+        data_tests: [not_null]
