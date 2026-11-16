@@ -72,3 +72,60 @@ models:
                 values: [first, middle, last]
       - name: linear_share
         data_tests: [not_null]
+
+  - name: int_person_source_campaign
+    description: >
+      One row per person in int_people with their source campaign: the campaign of their earliest touchpoint
+      (int_touchpoints order), else of their earliest membership by created_at, ties broken by campaign_member_id.
+      source_on is the touchpoint date or the membership created date. People with no membership have a null
+      source_campaign_id and source_type.
+    columns:
+      - name: email
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_people')
+                field: email
+      - name: source_campaign_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('int_campaigns__current')
+                field: campaign_id
+      - name: source_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [touchpoint, membership]
+
+  - name: int_opportunity_source_campaign
+    description: >
+      One row per opportunity with its source campaign, used for first-touch credit: the source campaign of the
+      primary contact role's person, else Opportunity.CampaignId, else 'Unattributed'. An opportunity whose primary
+      contact has no source campaign also falls back to Opportunity.CampaignId.
+    columns:
+      - name: opportunity_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_opportunities__current')
+                field: opportunity_id
+      - name: source_campaign_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_campaigns__current')
+                field: campaign_id
+              config:
+                where: "source_campaign_id != 'Unattributed'"
+      - name: source_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [primary_contact, opportunity_campaign, unattributed]
