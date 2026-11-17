@@ -17,5 +17,12 @@ models:
   fieldnote_marketing:
     intermediate:
       +materialized: view
+      core:
+        +tags: [core]
+      marketing:
+        +tags: [marketing]
     marts:
       +materialized: table
+      marketing:
+        +schema: marketing
+        +tags: [marketing]
