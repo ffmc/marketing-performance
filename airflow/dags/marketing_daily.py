@@ -51,13 +51,19 @@ with DAG(
         cwd=PROJECT_DIR,
     )
 
+    # The account no longer allows legacy notebook objects, so the notebook's SQL cells run here in order.
+    # Its check cells cast 'CHECK FAILED' to int, which raises and fails the task.
     @task.external_python(task_id="refresh_silver", python=PIPELINE_PYTHON)
     def refresh_silver():
+        import json
         import os
 
         import snowflake.connector
 
-        notebook = "SILVER.PUBLIC.SILVER_REFRESH"
+        notebook = os.path.join(os.environ["PROJECT_DIR"], "snowflake/notebooks/silver/silver.ipynb")
+        with open(notebook) as f:
+            cells = ["".join(c["source"]) for c in json.load(f)["cells"] if c["cell_type"] == "code"]
+
         with snowflake.connector.connect(
             account=os.environ["SNOWFLAKE_ACCOUNT"],
             user="DBT_USER",
@@ -66,15 +72,9 @@ with DAG(
             role="TRANSFORMER",
             warehouse="TRANSFORMING_WH",
         ) as con:
-            cur = con.cursor()
-            cur.execute("ALTER GIT REPOSITORY SILVER.PUBLIC.MARKETING_PERFORMANCE FETCH")
-            cur.execute(
-                f"CREATE OR REPLACE NOTEBOOK {notebook} "
-                "FROM '@SILVER.PUBLIC.MARKETING_PERFORMANCE/branches/main/snowflake/notebooks/silver/' "
-                "MAIN_FILE = 'silver.ipynb' QUERY_WAREHOUSE = TRANSFORMING_WH"
-            )
-            cur.execute(f"ALTER NOTEBOOK {notebook} ADD LIVE VERSION FROM LAST")
-            cur.execute(f"EXECUTE NOTEBOOK {notebook}()")
+            for number, sql in enumerate(cells, start=1):
+                print(f"Running cell {number}/{len(cells)}")
+                con.execute_string(sql)
 
     source_freshness = BashOperator(
         task_id="dbt_source_freshness",
