@@ -1,0 +1,59 @@
+name: Dashboard
+
+on:
+  repository_dispatch:
+    types: [dbt-success]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install snowflake-connector-python
+      - run: npm ci
+      - name: Write Snowflake key
+        run: |
+          printf '%s\n' "$REPORTER_PRIVATE_KEY" > "$RUNNER_TEMP/reporter_key.p8"
+          chmod 600 "$RUNNER_TEMP/reporter_key.p8"
+        env:
+          REPORTER_PRIVATE_KEY: ${{ secrets.REPORTER_PRIVATE_KEY }}
+      - run: npm run build
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          DASHBOARD_PRIVATE_KEY_PATH: ${{ runner.temp }}/reporter_key.p8
+          DBT_TESTS_PASSED: ${{ github.event.client_payload.tests_passed }}
+          DBT_TESTS_TOTAL: ${{ github.event.client_payload.tests_total }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

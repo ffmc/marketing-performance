@@ -4,7 +4,9 @@ A portfolio project that follows every marketing campaign at Fieldnote, a fictio
 
 Salesforce data lands in Snowflake, dbt cleans, models and tests it, and Airflow runs the whole refresh every day.
 
-**Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan, Snowflake setup, the Salesforce data simulator and the raw loader. Next: the Silver notebook, dbt models, data quality tests, the Airflow schedule and the dashboard (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
+**Dashboard:** [ffmc.github.io/marketing-performance](https://ffmc.github.io/marketing-performance/)
+
+**Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan, Snowflake setup, the Salesforce data simulator, the raw loader, the Silver notebook, dbt models and tests, the Airflow schedule and the dashboard. Next: review and polish (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
 
 ## The business case
 
@@ -54,7 +56,7 @@ ECB exchange rates ───┴─> Snowflake RAW ─> SILVER (notebooks) ─> d
 | Cleaning | One clean table per Salesforce object: correct types, duplicates removed, deleted records flagged, renamed picklist values aligned | Snowflake notebooks, SQL |
 | Modeling | Latest state of each record, duplicate leads merged, leads linked to their contacts and deals, one source campaign per lead and deal, then the marts behind each question | dbt, SQL |
 | Data quality | Tests on every source and model: funnel counts never grow down the stages, campaign pipeline adds up to the company total, no deal belongs to two campaigns, and totals match an answer key | dbt |
-| Reporting | A dashboard with one page per question area | Streamlit in Snowflake or Power BI |
+| Reporting | A public single-page dashboard, rebuilt after every passing dbt run | Observable Framework, D3, GitHub Pages |
 | Orchestration | A daily Airflow run loads, builds and tests everything, retries failed steps and alerts on failure | Airflow |
 
 ### Design decisions

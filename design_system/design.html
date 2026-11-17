@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldnote Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mirror of design_system/design.md. Do not edit by hand: change design.md, then regenerate. */
+:root {
+  --color-background: #F6F5F8; --color-surface: #FFFFFF; --color-surface-sunken: #EEECF2; --color-border: #E1DEE7; --color-grid: #EBE9F0;
+  --color-text-primary: #311847; --color-text-secondary: #4E4560; --color-text-muted: #6B6478;
+  --color-accent: #85858A; --color-accent-text: #66666B; --color-focus-ring: #311847; --color-mark-muted: #948FA3;
+  --color-success: #1F7A4D; --color-danger: #B42318; --color-warning: #A15C00;
+  --channel-webinar: #3581B8; --channel-paid-search: #EC4067; --channel-event: #7C4DB0; --channel-content: #CC7620; --channel-partner: #A01A7D; --channel-email: #3C96BF;
+  --channel-text-webinar: #28699A; --channel-text-paid-search: #C42A52; --channel-text-event: #6A3D9C; --channel-text-content: #8F4F0A; --channel-text-partner: #A01A7D; --channel-text-email: #1F6F93;
+  --elevation-sm: 0 1px 2px rgb(49 24 71 / .05), 0 8px 24px -12px rgb(49 24 71 / .12);
+
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, monospace;
+  --type-xs-size: .75rem; --type-sm-size: .875rem; --type-base-size: 1rem; --type-lg-size: 1.25rem; --type-xl-size: 1.563rem; --type-2xl-size: 1.953rem; --type-3xl-size: 2.441rem; --type-4xl-size: 3.052rem;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 80px;
+  --radius-mark: 4px; --radius-control: 10px; --radius-panel: 14px; --radius-card: 20px; --radius-pill: 999px;
+  --motion-fast: 120ms; --motion-ui: 180ms; --motion-data: 520ms; --motion-draw: 800ms; --ease-out: cubic-bezier(.2,.7,.2,1);
+  color-scheme: light;
+}
+@media (prefers-reduced-motion: reduce) { :root { --motion-fast: 0ms; --motion-ui: 0ms; --motion-data: 0ms; --motion-draw: 0ms; } }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-background); color: var(--color-text-primary); font: 400 var(--type-base-size)/1.5 var(--font-body); }
+main { max-width: 1100px; margin: 0 auto; padding: var(--space-7) max(16px, env(safe-area-inset-left)); display: grid; gap: var(--space-8); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; margin: 0; }
+h2 { font-size: var(--type-xl-size); margin-bottom: var(--space-4); }
+h3 { font-size: var(--type-sm-size); font-family: var(--font-body); font-weight: 600; letter-spacing: 0; color: var(--color-text-secondary); margin: var(--space-5) 0 var(--space-3); }
+p { margin: 0; max-width: 72ch; color: var(--color-text-secondary); }
+code { font-family: var(--font-data); font-size: var(--type-xs-size); color: var(--color-text-secondary); }
+:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.top { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-end; justify-content: space-between; }
+.top h1 { font-size: var(--type-3xl-size); letter-spacing: -.03em; }
+.toggle { min-height: 44px; padding: 0 16px; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); font: inherit; cursor: pointer; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+.sw { border: 1px solid var(--color-border); border-radius: var(--radius-control); overflow: hidden; background: var(--color-surface); }
+.sw div { height: 56px; }
+.sw span { display: block; padding: 8px 10px; font: 400 var(--type-xs-size)/1.4 var(--font-data); color: var(--color-text-secondary); }
+.sw b { display: block; font: 600 var(--type-xs-size) var(--font-body); color: var(--color-text-primary); }
+.spec { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-4); align-items: baseline; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-grid); }
+.spec code { white-space: nowrap; }
+.bar { height: 12px; background: var(--color-accent); border-radius: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+.box { width: 88px; height: 64px; background: var(--color-surface); border: 1px solid var(--color-border); display: grid; place-items: center; font: var(--type-xs-size) var(--font-data); color: var(--color-text-secondary); }
+
+/* components, as specified in design.md */
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-secondary); font: var(--type-sm-size) var(--font-body); cursor: pointer; transition: border-color var(--motion-ui) var(--ease-out), color var(--motion-ui) var(--ease-out); }
+.chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--color-mark-muted)); }
+.chip.all::before { display: none; }
+.chip:hover, .chip.is-hover { color: var(--color-text-primary); border-color: var(--color-text-muted); }
+.chip[aria-pressed="true"] { color: var(--color-text-primary); border-color: var(--c, var(--color-text-primary)); box-shadow: inset 0 0 0 1px var(--c, var(--color-text-primary)); }
+.seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--color-surface-sunken); border-radius: var(--radius-control); }
+.seg button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 7px; background: transparent; color: var(--color-text-secondary); font: var(--type-sm-size) var(--font-body); cursor: pointer; }
+.seg button[aria-checked="true"] { background: var(--color-surface); color: var(--color-text-primary); box-shadow: var(--elevation-sm); }
+.kpi { display: grid; gap: var(--space-3); max-width: 280px; }
+.kpi-head { display: flex; align-items: center; gap: 6px; font-size: var(--type-sm-size); color: var(--color-text-secondary); }
+.info { position: relative; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--color-border); background: transparent; color: var(--color-text-muted); font: 11px/1 var(--font-data); padding: 0; cursor: help; }
+.pop { display: inline-block; max-width: 260px; padding: 10px 12px; border-radius: var(--radius-control); background: var(--color-text-primary); color: var(--color-background); font: var(--type-xs-size)/1.45 var(--font-body); }
+.kpi-value { font: 700 var(--type-2xl-size)/1 var(--font-display); letter-spacing: -.03em; font-feature-settings: "tnum"; }
+.dim { color: var(--color-text-muted); font-weight: 500; }
+.delta { font-size: var(--type-xs-size); color: var(--color-text-secondary); }
+.delta b { font-family: var(--font-data); color: var(--color-success); }
+.delta.down b { color: var(--color-danger); }
+.headline { font: 700 var(--type-2xl-size)/1.1 var(--font-display); letter-spacing: -.025em; max-width: 26ch; color: var(--color-text-primary); }
+.headline .num { color: var(--color-accent); }
+.ch { font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); font: 500 var(--type-sm-size) var(--font-body); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; }
+.legend .off { opacity: .45; }
+.tip { display: inline-block; min-width: 220px; padding: 12px 14px; border-radius: 12px; background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--elevation-sm); font-size: var(--type-xs-size); }
+.tip h4 { margin: 0 0 2px; font: 600 var(--type-sm-size) var(--font-body); }
+.tip dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 16px; margin: 8px 0 0; }
+.tip dt { color: var(--color-text-secondary); } .tip dd { margin: 0; font-family: var(--font-data); text-align: right; }
+.tb-scroll { max-height: 200px; overflow: auto; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-surface); }
+table { width: 100%; border-collapse: collapse; font-size: var(--type-sm-size); }
+th { position: sticky; top: 0; background: var(--color-surface); text-align: left; font-weight: 500; color: var(--color-text-secondary); padding: 12px 14px; box-shadow: inset 0 -1px 0 var(--color-border); }
+th[aria-sort] { color: var(--color-text-primary); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--color-grid); color: var(--color-text-secondary); }
+td.n, th.n { text-align: right; font-family: var(--font-data); }
+td.n { color: var(--color-text-primary); }
+tr.hover td { background: var(--color-surface-sunken); }
+.search { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; max-width: 360px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text-muted); }
+.search.focus { border-color: var(--color-text-primary); }
+.search input { border: 0; outline: 0; background: transparent; font: inherit; color: var(--color-text-primary); width: 100%; }
+.trust { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); font-size: var(--type-xs-size); color: var(--color-text-secondary); }
+.trust svg { color: var(--color-success); } .trust.fail svg { color: var(--color-danger); }
+.chart { width: 100%; max-width: 520px; height: auto; display: block; }
+.dos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6); }
+.dos ul { margin: 0; padding-left: 1.1em; color: var(--color-text-secondary); display: grid; gap: var(--space-2); }
+.dos h3 { margin-top: 0; }
+.motion-demo .bar { width: 30%; transition: width var(--motion-data) var(--ease-out); }
+.motion-demo.go .bar { width: 85%; }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div><p style="font:500 var(--type-xs-size) var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted)">Design system · alpha</p><h1>Fieldnote Ledger</h1><p>Editorial, sentence-led data story for Fieldnote marketing performance. This page mirrors <code>design_system/design.md</code>.</p></div>
+  </header>
+
+  <section><h2>Colors</h2>
+    <h3>Surfaces and text</h3><div class="grid" id="sw-base"></div>
+    <h3>Accent and status</h3><div class="grid" id="sw-status"></div>
+    <h3>Channels: mark colour, then text colour</h3><div class="grid" id="sw-channels"></div>
+  </section>
+
+  <section><h2>Typography</h2>
+    <p>Schibsted Grotesk for display, IBM Plex Sans for body, IBM Plex Mono for data. Ratio 1.25.</p>
+    <div id="type"></div>
+  </section>
+
+  <section><h2>Spacing</h2><div id="space"></div></section>
+
+  <section><h2>Radius</h2><div class="row" id="radius"></div></section>
+
+  <section><h2>Elevation</h2>
+    <div class="row"><div class="box" style="border-radius:var(--radius-panel)">flat + border</div><div class="box" style="border-radius:var(--radius-panel);box-shadow:var(--elevation-sm)">sm</div></div>
+  </section>
+
+  <section><h2>Components</h2>
+    <h3>Chip: default, hover, pressed, focus; all</h3>
+    <div class="row">
+      <button class="chip all" aria-pressed="false" type="button">All channels</button>
+      <button class="chip" style="--c:var(--channel-webinar)" aria-pressed="false" type="button">Webinar</button>
+      <button class="chip is-hover" style="--c:var(--channel-paid-search)" aria-pressed="false" type="button">Paid Search (hover)</button>
+      <button class="chip" style="--c:var(--channel-event)" aria-pressed="true" type="button">Event (pressed)</button>
+      <button class="chip" style="--c:var(--channel-content);outline:2px solid var(--color-focus-ring);outline-offset:2px" aria-pressed="false" type="button">Content (focus)</button>
+    </div>
+    <h3>Segmented control</h3>
+    <div class="seg" role="radiogroup"><button role="radio" aria-checked="true" type="button">First touch</button><button role="radio" aria-checked="false" type="button">Last touch</button><button role="radio" aria-checked="false" type="button">Linear</button></div>
+    <h3>KPI tile and definition popover</h3>
+    <div class="row" style="align-items:flex-start;gap:var(--space-7)">
+      <div class="kpi"><div class="kpi-head">Pipeline created <button class="info" type="button" aria-label="Definition">i</button></div><div class="kpi-value">€4<span class="dim">.82M</span></div><span class="delta"><b>+18%</b> vs prior 12 months</span></div>
+      <div class="kpi"><div class="kpi-head">Win rate <button class="info" type="button" aria-label="Definition">i</button></div><div class="kpi-value">27<span class="dim">.4%</span></div><span class="delta down"><b>−3%</b> vs prior 12 months</span></div>
+      <span class="pop">Won deals divided by all closed deals (won plus lost) that closed in the period.</span>
+    </div>
+    <h3>Section headline: hero and section</h3>
+    <p class="headline" style="font-size:var(--type-4xl-size);font-weight:800">Campaigns created <span class="num">€4.82M</span> of pipeline.</p>
+    <p class="headline" style="margin-top:var(--space-5)"><span class="ch" style="color:var(--channel-text-partner)">Partner</span> returns €11.2 of pipeline per euro spent.</p>
+    <h3>Legend: categorical, size; deselected</h3>
+    <div class="legend" id="legend"></div>
+    <h3>Chart marks</h3>
+    <svg class="chart" viewBox="0 0 520 170" role="img" aria-label="Mark specimens">
+      <g stroke="var(--color-grid)"><line x1="40" x2="510" y1="30" y2="30"/><line x1="40" x2="510" y1="80" y2="80"/><line x1="40" x2="510" y1="130" y2="130"/></g>
+      <g font-family="var(--font-data)" font-size="12" fill="var(--color-text-secondary)" text-anchor="end"><text x="32" y="34">€20k</text><text x="32" y="84">€10k</text><text x="32" y="134">€0</text></g>
+      <path d="M50 120 C 90 100, 120 70, 160 75 S 230 40, 260 45" fill="none" stroke="var(--channel-webinar)" stroke-width="2"/>
+      <circle cx="260" cy="45" r="5" fill="var(--channel-webinar)" stroke="var(--color-surface)" stroke-width="2"/>
+      <circle cx="300" cy="90" r="8" fill="var(--channel-partner)" stroke="var(--color-surface)" stroke-width="2"/>
+      <circle cx="320" cy="70" r="5" fill="var(--color-mark-muted)" stroke="var(--color-surface)" stroke-width="2"/>
+      <line x1="280" y1="130" x2="380" y2="30" stroke="var(--color-text-muted)" stroke-dasharray="3 4"/>
+      <rect x="400" y="60" width="22" height="70" rx="4" fill="var(--channel-content)"/>
+      <rect x="424" y="90" width="22" height="40" rx="4" fill="var(--channel-email)"/>
+      <rect x="448" y="40" width="22" height="90" rx="4" fill="var(--channel-event)"/>
+      <line x1="40" x2="510" y1="130" y2="130" stroke="var(--color-border)"/>
+    </svg>
+    <h3>Tooltip</h3>
+    <div class="tip"><h4>Benchmark report · Mar 26</h4><div style="color:var(--color-text-muted)"><span class="ch" style="color:var(--channel-text-content)">Content</span> · GB</div><dl><dt>Cost</dt><dd>€2.1k</dd><dt>Pipeline</dt><dd>€38k</dd><dt>Pipeline to spend</dt><dd>18.1×</dd></dl></div>
+    <h3>Search input: default, focus</h3>
+    <div class="row"><label class="search"><input placeholder="Find a campaign, channel or country" aria-label="Search"></label><label class="search focus"><input value="webinar" aria-label="Search, focused"></label></div>
+    <h3>Data table: sorted column, row hover, sticky header</h3>
+    <div class="tb-scroll"><table><thead><tr><th>Campaign</th><th>Channel</th><th class="n" aria-sort="descending">Pipeline ↓</th><th class="n">Cost</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <h3>Trust badge: passing, failing</h3>
+    <div class="row">
+      <span class="trust"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Refreshed 17 Nov 2026 · 64 of 64 dbt tests passed</span>
+      <span class="trust fail"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Showing 16 Nov 2026 · today's refresh failed 2 tests</span>
+    </div>
+    <h3>Motion: data transition (click to replay)</h3>
+    <button class="motion-demo toggle" type="button" style="width:100%;max-width:520px;text-align:left;padding:12px 16px" id="motion"><div class="bar"></div></button>
+  </section>
+
+  <section><h2>Do's and Don'ts</h2>
+    <div class="dos">
+      <div><h3>Do</h3><ul>
+        <li>Write each section headline as a finding computed from the data.</li>
+        <li>Colour channel names in their channel text colour.</li>
+        <li>Recompute rates and cost-per metrics from counts after filtering.</li>
+        <li>Give every metric a definition popover matching metrics.md.</li>
+        <li>Keep interactive targets at 44px or larger.</li>
+        <li>Show "Not recorded" for missing costs.</li></ul></div>
+      <div><h3>Don't</h3><ul>
+        <li>Use Inter, Geist, Bricolage Grotesque or Space Grotesk.</li>
+        <li>Wrap sections in cards or use coloured left-border cards.</li>
+        <li>Use gradients, glassmorphism or glow shadows.</li>
+        <li>Use the accent as a channel colour.</li>
+        <li>Add a second y-axis, pie charts or ring gauges.</li>
+        <li>Use bounce easing or looping animation.</li></ul></div>
+    </div>
+  </section>
+</main>
+<script>
+const v = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const sw = (el, names) => {
+  const draw = () => { el.innerHTML = names.map(([n, label]) => `<div class="sw"><div style="background:var(${n})"></div><span><b>${label}</b>${n}<br>${v(n)}</span></div>`).join(''); };
+  draw(); return draw;
+};
+const channels = ['webinar', 'paid-search', 'event', 'content', 'partner', 'email'];
+const redraws = [
+  sw(document.getElementById('sw-base'), [['--color-background', 'background'], ['--color-surface', 'surface'], ['--color-surface-sunken', 'surfaceSunken'], ['--color-border', 'border'], ['--color-grid', 'grid'], ['--color-text-primary', 'textPrimary'], ['--color-text-secondary', 'textSecondary'], ['--color-text-muted', 'textMuted'], ['--color-mark-muted', 'markMuted']]),
+  sw(document.getElementById('sw-status'), [['--color-accent', 'accent'], ['--color-accent-text', 'accentText'], ['--color-focus-ring', 'focusRing'], ['--color-success', 'success'], ['--color-danger', 'danger'], ['--color-warning', 'warning']]),
+  sw(document.getElementById('sw-channels'), channels.flatMap(c => [[`--channel-${c}`, `channel.${c}`], [`--channel-text-${c}`, `channelText.${c}`]])),
+];
+const scale = [['4xl', 800, 'display'], ['3xl', 700, 'display'], ['2xl', 700, 'display'], ['xl', 700, 'display'], ['lg', 700, 'display'], ['base', 400, 'body'], ['sm', 400, 'body'], ['xs', 400, 'body']];
+document.getElementById('type').innerHTML = scale.map(([k, w, f]) => `<div class="spec"><code>${k} · ${w} · ${f}</code><div style="font:${w} var(--type-${k}-size)/1.15 var(--font-${f});letter-spacing:${f === 'display' ? '-.025em' : '0'}">Pipeline that closes</div></div>`).join('')
+  + `<div class="spec"><code>data · 400 · mono</code><div style="font:400 var(--type-xs-size) var(--font-data)">€12,400 · 10.2× · Jan 2026</div></div>`;
+document.getElementById('space').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(n => `<div class="spec"><code>--space-${n} · ${v('--space-' + n)}</code><div class="bar" style="width:var(--space-${n})"></div></div>`).join('');
+document.getElementById('radius').innerHTML = ['mark', 'control', 'panel', 'card', 'pill'].map(r => `<div class="box" style="border-radius:var(--radius-${r})">${r}</div>`).join('');
+document.getElementById('legend').innerHTML = channels.map((c, i) => `<span class="${i === 4 ? 'off' : ''}"><i style="background:var(--channel-${c})"></i>${c.replace('-', ' ').replace(/\b\w/g, m => m.toUpperCase())}${i === 4 ? ' (deselected)' : ''}</span>`).join('') + `<span><i style="border:1.5px solid var(--color-text-secondary);width:16px;height:16px"></i>Size: won revenue</span>`;
+document.getElementById('tbody').innerHTML = [['Trial nurture · Aug 26', 'email', '€61k', '€640'], ['London Ops Summit · May 26', 'event', '€58k', '€21.4k'], ['Capacity planning live · Jun 26', 'webinar', '€44k', '€3.9k'], ['Brand terms · Feb 26', 'paid-search', '€39k', '€11.2k'], ['Benchmark report · Mar 26', 'content', '€38k', '€2.1k'], ['Agency programme · Jan 26', 'partner', '€33k', 'Not recorded']]
+  .map(([n, c, p, k], i) => `<tr class="${i === 1 ? 'hover' : ''}"><td style="color:var(--color-text-primary);font-weight:500">${n}</td><td><span class="ch" style="color:var(--channel-text-${c})">${c.replace('-', ' ')}</span></td><td class="n">${p}</td><td class="n">${k === 'Not recorded' ? '<span class="dim">Not recorded</span>' : k}</td></tr>`).join('');
+const m = document.getElementById('motion');
+m.addEventListener('click', () => { m.classList.remove('go'); void m.offsetWidth; m.classList.add('go'); });
+</script>
+</body>
+</html>

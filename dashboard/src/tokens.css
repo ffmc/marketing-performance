@@ -1,0 +1,83 @@
+/* Generated from design_system/design.md. Edit design.md, then regenerate this file. */
+:root {
+  --color-background: #F6F5F8;
+  --color-surface: #FFFFFF;
+  --color-surface-sunken: #EEECF2;
+  --color-border: #E1DEE7;
+  --color-grid: #EBE9F0;
+  --color-text-primary: #311847;
+  --color-text-secondary: #4E4560;
+  --color-text-muted: #6B6478;
+  --color-accent: #85858A;
+  --color-accent-text: #66666B;
+  --color-focus-ring: #311847;
+  --color-mark-muted: #948FA3;
+  --color-success: #1F7A4D;
+  --color-danger: #B42318;
+  --color-warning: #A15C00;
+
+  --channel-webinar: #3581B8;
+  --channel-paid-search: #EC4067;
+  --channel-event: #7C4DB0;
+  --channel-content: #CC7620;
+  --channel-partner: #A01A7D;
+  --channel-email: #3C96BF;
+  --channel-text-webinar: #28699A;
+  --channel-text-paid-search: #C42A52;
+  --channel-text-event: #6A3D9C;
+  --channel-text-content: #8F4F0A;
+  --channel-text-partner: #A01A7D;
+  --channel-text-email: #1F6F93;
+
+  --elevation-sm: 0 1px 2px rgb(49 24 71 / .05), 0 8px 24px -12px rgb(49 24 71 / .12);
+
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --type-xs-size: .75rem;
+  --type-sm-size: .875rem;
+  --type-base-size: 1rem;
+  --type-lg-size: 1.25rem;
+  --type-xl-size: 1.563rem;
+  --type-2xl-size: 1.953rem;
+  --type-3xl-size: 2.441rem;
+  --type-4xl-size: 3.052rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 80px;
+
+  --radius-mark: 4px;
+  --radius-control: 10px;
+  --radius-panel: 14px;
+  --radius-card: 20px;
+  --radius-pill: 999px;
+
+  --motion-fast: 120ms;
+  --motion-ui: 180ms;
+  --motion-data: 520ms;
+  --motion-draw: 800ms;
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+
+  --layout-max-width: 1240px;
+  --measure-body: 52ch;
+  --measure-footnote: 72ch;
+  --measure-hero: 26ch;
+
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-ui: 0ms;
+    --motion-data: 0ms;
+    --motion-draw: 0ms;
+  }
+}

@@ -33,9 +33,10 @@ with DAG(
     },
     tags=["marketing"],
 ) as dag:
+    # --resume also writes any days missed since the last run, so no record change is skipped.
     simulate = BashOperator(
         task_id="simulate",
-        bash_command=f"{PIPELINE_PYTHON} simulator/simulate.py --until {{{{ ds }}}}",
+        bash_command=f"{PIPELINE_PYTHON} simulator/simulate.py --until {{{{ ds }}}} --resume",
         cwd=PROJECT_DIR,
     )
 
@@ -87,4 +88,29 @@ with DAG(
         bash_command=f"{DBT} build",
     )
 
-    [simulate, fx] >> load >> refresh_silver() >> source_freshness >> dbt_build
+    # Runs only when dbt_build passed, so the public dashboard never shows numbers from a failed build.
+    @task(task_id="trigger_dashboard_deploy")
+    def trigger_dashboard_deploy():
+        import json
+        import urllib.request
+
+        with open(os.path.join(os.environ["DBT_TARGET_PATH"], "run_results.json")) as f:
+            results = json.load(f)["results"]
+        tests = [r for r in results if r["unique_id"].startswith("test.")]
+        payload = {
+            "event_type": "dbt-success",
+            "client_payload": {"tests_passed": sum(r["status"] == "pass" for r in tests), "tests_total": len(tests)},
+        }
+        request = urllib.request.Request(
+            "https://api.github.com/repos/ffmc/marketing-performance/dispatches",
+            data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {os.environ['GITHUB_DISPATCH_TOKEN']}",
+                "Accept": "application/vnd.github+json",
+            },
+            method="POST",
+        )
+        urllib.request.urlopen(request).close()
+        log.info("Dashboard deploy requested: %s", payload["client_payload"])
+
+    [simulate, fx] >> load >> refresh_silver() >> source_freshness >> dbt_build >> trigger_dashboard_deploy()

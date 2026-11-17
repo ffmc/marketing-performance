@@ -11,3 +11,6 @@ dbt/.user.yml
 .claude/settings.local.json
 airflow/.env
 airflow/logs/
+dashboard/node_modules/
+dashboard/dist/
+dashboard/src/.observablehq/cache/
