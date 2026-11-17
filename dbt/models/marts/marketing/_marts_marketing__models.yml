@@ -6,6 +6,15 @@ models:
     columns:
       - name: campaign_id
         data_tests: [unique, not_null]
+      - name: campaign_country
+        description: Parsed from the campaign name. Null only for the Unattributed row.
+        data_tests:
+          - not_null:
+              config:
+                where: "campaign_id <> 'Unattributed'"
+          - accepted_values:
+              arguments:
+                values: [ES, GB, US]
 
   - name: dim_accounts
     description: One row per account, current state.

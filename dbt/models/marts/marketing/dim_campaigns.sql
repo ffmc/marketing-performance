@@ -3,6 +3,8 @@ with campaigns as (
           campaign_id,
           campaign_name,
           campaign_type,
+          -- Salesforce has no country field on Campaign; the naming convention is "YYYY-MM Type CC - Topic".
+          regexp_substr(campaign_name, ' (ES|GB|US) - ', 1, 1, 'e', 1) as campaign_country,
           campaign_status,
           start_on,
           end_on,
@@ -19,6 +21,7 @@ with campaigns as (
       'Unattributed' as campaign_id,
       'Unattributed' as campaign_name,
       null as campaign_type,
+      null as campaign_country,
       null as campaign_status,
       null as start_on,
       null as end_on,

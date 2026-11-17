@@ -9,7 +9,7 @@ sources:
       - name: rates
         description: One row per currency per business day. Units of currency per 1 EUR; GBP and USD only, EUR is the base. No rates on weekends or TARGET holidays.
         config:
-          loaded_at_field: rate_on
+          loaded_at_field: "rate_on::timestamp_ntz"
           freshness:
             warn_after: {count: 4, period: day}
             error_after: {count: 6, period: day}

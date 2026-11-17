@@ -6,13 +6,15 @@ sources:
     database: silver
     schema: salesforce
     config:
-      loaded_at_field: delivered_on
+      loaded_at_field: "delivered_on::timestamp_ntz"
       freshness:
         warn_after: {count: 1, period: day}
         error_after: {count: 2, period: day}
     tables:
       - name: users
         description: One row per user per delivery. Sales reps; re-delivered when a rep is deactivated.
+        config:
+          freshness: null
         data_tests:
           - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
               arguments:

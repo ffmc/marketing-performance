@@ -436,10 +436,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--until", type=date.fromisoformat, default=date.today() - timedelta(days=1))
     ap.add_argument("--backfill", action="store_true", help="write every day's files, not only --until")
+    ap.add_argument("--resume", action="store_true", help="also write every day after the newest landing file")
     ap.add_argument("--out", type=Path, default=Path(__file__).resolve().parent.parent / "landing")
     a = ap.parse_args()
 
-    sim = Sim(a.until, C.START if a.backfill else a.until)
+    first = C.START if a.backfill else a.until
+    if a.resume:
+        days = sorted(p.stem for p in (a.out / "salesforce").glob("*/*.jsonl"))
+        if days:
+            first = min(a.until, date.fromisoformat(days[-1]) + timedelta(days=1))
+    sim = Sim(a.until, first)
     sim.run()
     written = 0
     for (day, path), lines in sorted(sim.out.items()):
