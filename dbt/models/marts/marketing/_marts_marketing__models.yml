@@ -27,3 +27,129 @@ models:
           - not_null:
               config:
                 where: is_won
+
+  - name: fct_opportunity_stage_history
+    description: One row per opportunity stage change. days_in_stage is the days until the next change and is null for the current stage. amount_eur uses the ECB rate on or before entered_on.
+    columns:
+      - name: opportunity_history_id
+        data_tests: [unique, not_null]
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_opportunities')
+                field: opportunity_id
+      - name: source_campaign_id
+        data_tests: [not_null]
+      - name: amount_eur
+        data_tests: [not_null]
+
+  - name: fct_campaign_funnel
+    description: >
+      One row per campaign and person (email) with the date each funnel stage was reached. member_at is the earliest
+      membership. Later stages are filled only on the person's source campaign, so stage counts never increase down
+      the funnel. lead_on is the source date; mql_at and sql_at are the earliest across the person's leads;
+      opportunity_on is the converted opportunity, else the primary-contact opportunity; won_on is its close date if won.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [campaign_id, email]
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_campaigns')
+                field: campaign_id
+      - name: email
+        data_tests: [not_null]
+      - name: member_at
+        data_tests: [not_null]
+
+  - name: fct_touchpoints
+    description: >
+      One row per opportunity touchpoint with its share and EUR pipeline credit under first-touch, last-touch and
+      linear attribution. is_fallback rows have no touchpoint: opportunities without touchpoints get one, with full
+      credit in every model to Opportunity.CampaignId or Unattributed; opportunities with touchpoints but no primary
+      contact get one carrying only the first-touch credit. Each model's shares sum to 1 per opportunity.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "first_touch_share + last_touch_share + linear_share > 0"
+    columns:
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_opportunities')
+                field: opportunity_id
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_campaigns')
+                field: campaign_id
+
+  - name: mart_campaign_performance
+    description: >
+      One row per campaign and month. Funnel counts and conversion rates are a cohort: people who joined the campaign
+      that month, with every stage they ever reached. Pipeline created is by the opportunity's created month and won
+      revenue by close month, both credited to the source campaign (first touch). Cost is spread evenly over the
+      campaign's run days; cost metrics are null for campaigns without cost or when the denominator is zero.
+      Velocity medians are by the month the later stage was reached. Rates, cost per X and medians must not be
+      summed or averaged across rows; recompute them from the counts.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [campaign_id, month]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "members >= leads and leads >= mqls and mqls >= sqls and sqls >= opportunities and opportunities >= won_deals"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "cost_eur is null"
+          config:
+            where: "not has_cost"
+    columns:
+      - name: campaign_id
+        data_tests: [not_null]
+      - name: month
+        data_tests: [not_null]
+
+  - name: mart_campaign_attribution
+    description: >
+      One row per campaign, month, attribution model (first_touch, last_touch, linear) and currency. Every
+      campaign, month and currency has all three model rows, zero where a model gives no credit. Pipeline created
+      and opportunities (sum of credit shares, so fractional for linear) are by the opportunity's created month; won
+      revenue by close month; amounts in original currency and EUR. Within a model, campaign totals add up to company
+      pipeline. Influenced pipeline, influenced_opportunities and total_touches don't depend on the model and repeat
+      on each model row; influenced pipeline double-counts across campaigns by design and must never be summed
+      across campaigns or models. touches_per_opportunity = total_touches / influenced_opportunities.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [campaign_id, month, model, currency]
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_campaigns')
+                field: campaign_id
+      - name: month
+        data_tests: [not_null]
+      - name: model
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [first_touch, last_touch, linear]
+      - name: currency
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [EUR, GBP, USD]

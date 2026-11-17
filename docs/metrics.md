@@ -15,7 +15,7 @@ Each lead and contact is attributed to one **source campaign**: its earliest tou
 | opportunity | a converted lead with `ConvertedOpportunityId`, or an opportunity attributed to the campaign |
 | won | opportunity with `IsWon = true` |
 
-Conversion rate between two stages = records reaching the later stage / records reaching the earlier one, by the month of the earlier stage (cohort view).
+Conversion rate between two stages = records reaching the later stage / records reaching the earlier one, by the month the person joined the campaign (cohort view): a month's row counts the people who became members that month and every stage they ever reached.
 
 ## Revenue
 - **Pipeline created** = `Amount` of opportunities by their `CreatedDate` month, in EUR.
@@ -25,6 +25,7 @@ Conversion rate between two stages = records reaching the later stage / records 
 
 ## Cost
 - Campaign cost = `Campaign.ActualCost`, falling back to `BudgetedCost` when actual is null. Campaigns with neither are excluded from cost metrics and flagged.
+- Monthly cost spreads campaign cost evenly over the days from `StartDate` to `EndDate`.
 - **Cost per lead / MQL / opportunity** = campaign cost / count at that stage.
 - **Pipeline to spend** = pipeline created / campaign cost.
 
@@ -46,7 +47,7 @@ Conversion rate between two stages = records reaching the later stage / records 
 - **Touches per opportunity** = count of opportunity touchpoints. **Days to opportunity** = days from the first opportunity touchpoint to `Opportunity.CreatedDate`.
 
 ## Velocity
-- **Lead to MQL, MQL to opportunity, opportunity to close**: median days between the timestamps of the two stages.
+- **Lead to MQL, MQL to opportunity, opportunity to close**: median days between the timestamps of the two stages, by the month of the later stage.
 - **Time in stage** = days between consecutive `OpportunityHistory` rows for the same opportunity.
 - **Stalled** = open opportunity with no stage change in the last 30 days.
 - **Stage regression** = an `OpportunityHistory` row whose stage sort order is lower than the previous one.
