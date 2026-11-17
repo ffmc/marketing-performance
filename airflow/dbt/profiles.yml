@@ -1,0 +1,14 @@
+# Profile used inside the Airflow containers. No secrets: the key is mounted and its path comes from the environment.
+fieldnote_marketing:
+  target: prod
+  outputs:
+    prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: DBT_USER
+      private_key_path: "{{ env_var('DBT_PRIVATE_KEY_PATH') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORMING_WH
+      database: GOLD
+      schema: MARKETING_INTERMEDIATE
+      threads: 4
