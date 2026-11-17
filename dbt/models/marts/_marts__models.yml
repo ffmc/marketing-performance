@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: fct_opportunities
+    description: One row per opportunity, current state. amount_eur uses the ECB rate on or before the created date (pipeline); won_amount_eur uses the rate on or before the close date and is null unless won.
+    columns:
+      - name: opportunity_id
+        data_tests: [unique, not_null]
+      - name: source_campaign_id
+        data_tests: [not_null]
+      - name: amount_eur
+        data_tests: [not_null]
+      - name: won_amount_eur
+        data_tests:
+          - not_null:
+              config:
+                where: is_won
