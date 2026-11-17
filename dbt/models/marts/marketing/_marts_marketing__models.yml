@@ -111,7 +111,7 @@ models:
             expression: "members >= leads and leads >= mqls and mqls >= sqls and sqls >= opportunities and opportunities >= won_deals"
       - dbt_utils.expression_is_true:
           arguments:
-            expression: "cost_eur is null"
+            expression: "coalesce(cost_eur, cost_per_lead_eur, cost_per_mql_eur, cost_per_opportunity_eur, pipeline_to_spend) is null"
           config:
             where: "not has_cost"
     columns:

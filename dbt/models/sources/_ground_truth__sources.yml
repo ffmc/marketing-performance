@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: ground_truth
+    description: Answer key written by simulator/simulate.py from the same definitions as metrics.md. Used only by reconciliation tests.
+    database: raw
+    schema: ground_truth
+    tables:
+      - name: campaign_pipeline_monthly
+        description: Pipeline created, won revenue and opportunity credit by campaign, month, attribution model and currency, in original currency.
