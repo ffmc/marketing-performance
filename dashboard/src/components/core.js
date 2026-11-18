@@ -8,7 +8,6 @@ const slug = (k) => k.toLowerCase().replace(/ /g, "-");
 export const chVar = (k) => (CHANNELS.includes(k) ? `var(--channel-${slug(k)})` : "var(--color-mark-muted)");
 export const chTextVar = (k) => (CHANNELS.includes(k) ? `var(--channel-text-${slug(k)})` : "var(--color-text-secondary)");
 export const chName = (k) => `<span class="chname" style="--ct: ${chTextVar(k)}">${k}</span>`;
-export const listNames = (a) => (a.length <= 2 ? a.join(" and ") : `${a.slice(0, -1).join(", ")} and ${a.at(-1)}`);
 
 const RM = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const dur = (ms) => (RM ? 0 : ms);
@@ -88,14 +87,9 @@ export const DEFINITIONS = {
   won: "Amount of won opportunities by their close month, in EUR at the ECB rate on the close date.",
   ratio: "Pipeline created divided by campaign cost, for campaigns with a recorded cost. Cost is spread evenly over each campaign's run days.",
   open: "Amount of opportunities that are not closed at the end of the day measured, in EUR.",
+  close: "Median days between an opportunity being created and closed, for opportunities closed in the period.",
   funnel: "Cohort view: people who joined a campaign in the period, and every stage they ever reached. Conversion = people reaching the later stage / people reaching the earlier one.",
   cpl: "Campaign cost divided by the number of leads, MQLs or opportunities.",
-  attribution: "First touch credits the source campaign. Last touch credits the latest touchpoint before the deal was created. Linear splits the amount evenly across every touchpoint.",
-  influenced: "Full amount of every opportunity with at least one touchpoint from the campaign. Double-counts by design, so it is never summed across campaigns.",
-  touches: "Touchpoints of every contact on the opportunity, dated on or before the day it was created.",
-  velocity: "Median days between the two stages, by the month the later stage was reached.",
-  stage: "Days between consecutive stage changes of the same opportunity.",
-  stalled: "Open opportunity with no stage change in the last 30 days.",
-  regression: "A stage change to a stage earlier in the sales process than the previous one."
+  stalled: "Open opportunity with no stage change in the last 30 days."
 };
 export const info = (key, label) => `<button class="info" type="button" aria-label="Definition of ${label}: ${DEFINITIONS[key]}" data-def="${DEFINITIONS[key]}">i</button>`;

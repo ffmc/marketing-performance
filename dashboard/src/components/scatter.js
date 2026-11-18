@@ -5,8 +5,8 @@ export const matchQuery = (c, q) => !q || c.topic.toLowerCase().includes(q) || c
 export function Scatter(el, getCampaigns, getState) {
   el.innerHTML = `
     <div class="legend">${CHANNELS.map((c) => `<span data-ch="${c}"><i style="background:${chVar(c)}"></i>${c}</span>`).join("")}<span><i class="ring"></i>Size: won revenue</span></div>
-    <div class="chart-wrap"></div>
-    <p class="footnote scatter-note"></p>`;
+    <div class="chart-wrap"></div>`;
+  const note = el.closest("section").querySelector(".scatter-note");
   const wrap = el.querySelector(".chart-wrap");
   const H = Math.round(Math.max(300, Math.min(500, wrap.clientWidth * 0.62)));
   const {svg, width: W} = svgIn(wrap, H);
@@ -17,6 +17,8 @@ export function Scatter(el, getCampaigns, getState) {
   const tip = tooltip(wrap);
   const gridG = svg.append("g"), xAxis = svg.append("g").attr("class", "axis"), yAxis = svg.append("g").attr("class", "axis");
   const refs = svg.append("g");
+  svg.append("line").attr("class", "axis-line").attr("x1", M.l).attr("x2", W - M.r).attr("y1", H - M.b).attr("y2", H - M.b);
+  svg.append("line").attr("class", "axis-line").attr("x1", M.l).attr("x2", M.l).attr("y1", M.t).attr("y2", H - M.b);
   svg.append("text").attr("class", "axis-title").attr("x", W - M.r).attr("y", H - 4).attr("text-anchor", "end").text("Campaign cost →");
   svg.append("text").attr("class", "axis-title").attr("x", M.l).attr("y", M.t - 4).text("↑ Pipeline created");
   const dots = svg.append("g").attr("class", "dots");
@@ -38,6 +40,8 @@ export function Scatter(el, getCampaigns, getState) {
     gridG.selectAll("line").data(yt, (d) => d).join("line").attr("class", "gridline").attr("x1", M.l).attr("x2", W - M.r).transition().duration(T).attr("y1", y).attr("y2", y);
     yAxis.selectAll("text").data(yt, (d) => d).join("text").attr("x", M.l - 8).attr("dy", ".32em").attr("text-anchor", "end").text(eur).transition().duration(T).attr("y", y);
     xAxis.selectAll("text").data(xt, (d) => d).join("text").attr("y", H - M.b + 18).attr("text-anchor", "middle").text(eur).transition().duration(T).attr("x", x);
+    yAxis.selectAll("line").data(yt, (d) => d).join("line").attr("class", "tick-mark").attr("x1", M.l - 5).attr("x2", M.l).transition().duration(T).attr("y1", y).attr("y2", y);
+    xAxis.selectAll("line").data(xt, (d) => d).join("line").attr("class", "tick-mark").attr("y1", H - M.b).attr("y2", H - M.b + 5).transition().duration(T).attr("x1", x).attr("x2", x);
 
     const lines = [1, 5, 10, 20].map((k) => {
       const x0 = Math.max(x.domain()[0], y.domain()[0] / k), x1 = Math.min(x.domain()[1], y.domain()[1] / k);
@@ -66,7 +70,7 @@ export function Scatter(el, getCampaigns, getState) {
     delaunay = d3.Delaunay.from(visible, (d) => x(d.cost), (d) => y(d.pipeline));
     el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = !s.channels.size || s.channels.has(n.dataset.ch) ? 1 : 0.45));
     const noCost = all.filter((c) => c.cost == null).length;
-    el.querySelector(".scatter-note").textContent = `${visible.length} campaigns with cost and pipeline in ${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}. Dashed lines mark 1×, 5×, 10× and 20× pipeline to spend.${noCost ? ` ${noCost} campaigns have no recorded cost and are not plotted.` : ""}`;
+    note.textContent = `${visible.length} campaigns with cost and pipeline in ${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}. Dashed lines mark 1×, 5×, 10× and 20× pipeline to spend.${noCost ? ` ${noCost} campaigns have no recorded cost and are not plotted.` : ""}`;
   }
 
   function hover(d) {

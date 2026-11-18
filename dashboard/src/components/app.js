@@ -1,13 +1,13 @@
-import {d3, CHANNELS, COUNTRIES, DEFINITIONS, chVar, chName, listNames, eur, ratio, pct, int, days, fmtMonth, fmtDate, reveal} from "./core.js";
+import {d3, CHANNELS, COUNTRIES, DEFINITIONS, chVar, chName, eur, ratio, pct, int, fmtMonth, fmtDate, reveal} from "./core.js";
 import * as model from "./model.js";
 import {KPIs} from "./kpis.js";
 import {PipelineArea} from "./area.js";
 import {Funnel} from "./funnel.js";
 import {Scatter, matchQuery} from "./scatter.js";
 import {Table} from "./table.js";
-import {Attribution, Influence, Touches, MODELS} from "./attribution.js";
-import {Velocity, StageTime} from "./speed.js";
-import {OpenByStage, StageFlow} from "./health.js";
+import {OpenByStage} from "./health.js";
+import {Lineage} from "./lineage.js";
+import {DocPopover} from "./docpop.js";
 
 const monthParam = d3.utcFormat("%Y-%m"), parseMonth = d3.utcParse("%Y-%m");
 
@@ -18,7 +18,6 @@ function readUrl(m) {
   return {
     country: ["ES", "GB", "US"].includes(q.get("country")) ? q.get("country") : "All",
     channels: new Set((q.get("channels") ?? "").split(",").filter((c) => CHANNELS.includes(c))),
-    model: MODELS.some(([k]) => k === q.get("model")) ? q.get("model") : "first_touch",
     range: valid ? range : model.defaultRange(m),
     query: ""
   };
@@ -28,7 +27,6 @@ function writeUrl(s, m) {
   const q = new URLSearchParams();
   if (s.country !== "All") q.set("country", s.country);
   if (s.channels.size) q.set("channels", [...s.channels].join(","));
-  if (s.model !== "first_touch") q.set("model", s.model);
   const [a, b] = model.defaultRange(m);
   if (+s.range[0] !== +a || +s.range[1] !== +b) { q.set("from", monthParam(s.range[0])); q.set("to", monthParam(s.range[1])); }
   history.replaceState(null, "", `${location.pathname}${q.size ? `?${q}` : ""}${location.hash}`);
@@ -40,6 +38,8 @@ export function app(root, raw) {
   const getState = () => state;
   let comps = [];
 
+  Lineage(root.querySelector("[data-c=\"lineage\"]"), raw.models);
+  DocPopover(root.querySelector(".masthead"), raw.docs);
   root.querySelector("[data-trust]").innerHTML = trustBadge(raw.meta);
   root.querySelectorAll("[data-info]").forEach((b) => {
     const text = b.dataset.info.split(" ").map((k) => DEFINITIONS[k]).join(" ");
@@ -121,13 +121,7 @@ export function app(root, raw) {
         empty: () => `No campaigns match${state.query ? ` "${state.query.replace(/[<>&"]/g, "")}"` : ""}. Clear the search or pick other channels.`,
         footnote: (n) => `${int(n)} campaigns active in the period. Scroll the table to see them all; hover a row to find it in the chart above.`
       }),
-      attribution: Attribution(at("attribution"), m, getState, setState),
-      influence: Influence(at("influence"), m, getState),
-      touches: Touches(at("touches"), m, getState),
-      velocity: Velocity(at("velocity"), m, getState),
-      stages: StageTime(at("stages"), m, getState),
       open: OpenByStage(at("open"), m, getState),
-      flow: StageFlow(at("flow"), m, getState),
       stalled: Table(at("stalled"), {
         sortKey: "idle",
         columns: [
@@ -136,7 +130,7 @@ export function app(root, raw) {
           {k: "channel", l: "Channel", txt: true, v: (r) => r.campaign?.channel, f: (r) => (CHANNELS.includes(r.campaign?.channel) ? chName(r.campaign.channel) : "–")},
           {k: "stage", l: "Stage", txt: true, v: (r) => r.stage_name, f: (r) => r.stage_name},
           {k: "amount", l: "Amount", v: (r) => r.amount_eur, f: (r) => eur(r.amount_eur)},
-          {k: "idle", l: "Days without a stage change", v: (r) => r.idle, f: (r) => int(r.idle)}
+          {k: "idle", l: "Days without a stage change", w: "10rem", v: (r) => r.idle, f: (r) => int(r.idle)}
         ],
         rows: () => model.health(m, state, state.range).stalled.map((r) => ({...r, id: r.opportunity_id})),
         empty: () => "No stalled opportunities for this selection."
@@ -149,29 +143,21 @@ export function app(root, raw) {
   function fillText() {
     const s = state;
     const k = model.kpis(m, s, s.range), prior = model.kpis(m, s, model.priorRange(s.range));
-    const att = model.attributionByChannel(m, s, s.range);
+    const sourced = model.sourcedByChannel(m, s, s.range);
     const pool = s.channels.size ? [...s.channels] : CHANNELS;
-    const top = pool.map((c) => [c, att.first_touch.get(c)]).sort((a, b) => b[1] - a[1])[0];
+    const top = pool.map((c) => [c, sourced.get(c)]).sort((a, b) => b[1] - a[1])[0];
     const steps = model.funnel(m, s, s.range).slice(2);
     const drop = steps.reduce((a, b) => ((b.rate ?? 1) < (a.rate ?? 1) ? b : a));
     const dropFrom = model.FUNNEL[model.FUNNEL.findIndex(([key]) => key === drop.key) - 1][1];
     const eff = model.channelTotals(model.campaignTotals(m, {...s, channels: new Set()}, s.range)).filter((c) => c.ratio != null).sort((a, b) => b.ratio - a.ratio);
-    // Channels under 5% of sourced pipeline are left out so a tiny base cannot produce a four-digit headline.
-    const gain = (md) => CHANNELS.filter((c) => att.first_touch.get(c) >= 0.05 * att.total).map((c) => [c, att[md].get(c) / att.first_touch.get(c) - 1]).sort((a, b) => b[1] - a[1])[0] ?? [CHANNELS[0], 0];
-    const lin = gain("linear");
-    const vel = model.velocity(m, s, s.range);
-    const slowest = model.timeInStage(m, s, s.range).filter((d) => d.median != null).sort((a, b) => b.median - a.median)[0];
     const h = model.health(m, s, s.range);
     const stalledAmount = d3.sum(h.stalled, (o) => o.amount_eur);
     const growth = prior.pipeline ? k.pipeline / prior.pipeline - 1 : null;
     const t = {
       scope: s.country === "All" ? "Spain, the UK and the US" : COUNTRIES[s.country],
       period: `${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}`,
-      who: s.channels.size ? `${listNames(CHANNELS.filter((c) => s.channels.has(c)).map(chName))} campaigns` : "Campaigns",
-      pipeline: eur(k.pipeline),
-      won: eur(k.won),
       top: top && top[1] ? chName(top[0]) : "No channel",
-      topShare: pct(top?.[1] / (att.total || 1), 0),
+      topShare: pct(top?.[1] / (sourced.total || 1), 0),
       growth: growth == null ? "" : `Pipeline is ${growth >= 0 ? "up" : "down"} ${pct(Math.abs(growth), 0)} on the previous period of the same length.`,
       dropFrom: dropFrom.toLowerCase(),
       dropTo: drop.label.toLowerCase(),
@@ -180,12 +166,6 @@ export function app(root, raw) {
       bestRatio: eff[0] ? `€${eff[0].ratio.toFixed(1)}` : "–",
       worst: eff.at(-1) ? chName(eff.at(-1).channel) : "–",
       worstRatio: eff.at(-1) ? `€${eff.at(-1).ratio.toFixed(1)}` : "–",
-      lin: chName(lin[0]),
-      linPct: pct(Math.max(0, lin[1]), 0),
-      close: days(vel[2].median),
-      leadMql: days(vel[0].median),
-      slowest: slowest ? slowest.stage : "–",
-      slowestDays: slowest ? days(slowest.median) : "–",
       stalledCount: int(h.stalled.length),
       stalledAmount: eur(stalledAmount),
       openTotal: eur(h.openTotal)

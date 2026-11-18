@@ -49,8 +49,13 @@ export function kpis(m, s, range) {
     pipeline: sum(rows, (r) => r.pipeline_created_eur),
     won: sum(rows, (r) => r.won_revenue_eur),
     ratio: safeDiv(sum(costed, (r) => r.pipeline_created_eur), sum(costed, (r) => r.cost_eur)),
-    open: openAt(m, f, end)
+    open: openAt(m, f, end),
+    close: closeDays(m, f, range)
   };
+}
+
+function closeDays(m, f, range) {
+  return d3.median(m.opportunities.filter((o) => o.is_closed && inRange(o.close_on, range) && f.campaign(o.campaign_id)), (o) => dayDiff(o.created_on, o.close_on));
 }
 
 function openAt(m, f, end) {
@@ -62,6 +67,7 @@ export function kpiSeries(m, s, range, key) {
   const f = filters(m, s);
   const months = d3.utcMonth.range(range[0], d3.utcMonth.offset(range[1], 1));
   if (key === "open") return months.map((mo) => openAt(m, f, d3.utcMonth.offset(mo, 1)));
+  if (key === "close") return months.map((mo) => closeDays(m, f, [mo, mo]) ?? 0);
   const byMonth = d3.group(m.months.filter((r) => f.campaign(r.campaign_id)), (r) => +r.month);
   return months.map((mo) => {
     const rows = byMonth.get(+mo) ?? [];
@@ -137,76 +143,29 @@ export function channelTotals(campaigns) {
   });
 }
 
-export function attributionByChannel(m, s, range) {
+export function sourcedByChannel(m, s, range) {
   const f = filters(m, s);
-  const rows = m.attribution.filter((r) => inRange(r.month, range) && f.country(r.campaign_id));
-  const by = d3.rollup(rows, (v) => sum(v, (r) => r.pipeline_created_eur), (r) => r.model, (r) => m.campaigns.get(r.campaign_id).channel);
-  const keys = [...CHANNELS, "Unattributed"];
-  const models = ["first_touch", "last_touch", "linear"];
-  const out = Object.fromEntries(models.map((md) => [md, new Map(keys.map((k) => [k, by.get(md)?.get(k) ?? 0]))]));
-  out.total = d3.sum(out.first_touch.values());
+  const rows = m.months.filter((r) => inRange(r.month, range) && f.country(r.campaign_id));
+  const by = d3.rollup(rows, (v) => sum(v, (r) => r.pipeline_created_eur), (r) => m.campaigns.get(r.campaign_id).channel);
+  const out = new Map([...CHANNELS, "Unattributed"].map((k) => [k, by.get(k) ?? 0]));
+  out.total = d3.sum(out.values());
   return out;
 }
 
-export function influencedByCampaign(m, s, range) {
-  const f = filters(m, s);
-  const rows = m.attribution.filter((r) => r.model === "first_touch" && inRange(r.month, range) && f.campaign(r.campaign_id));
-  return d3.rollups(rows, (v) => ({
-    sourced: sum(v, (r) => r.pipeline_created_eur),
-    influenced: sum(v, (r) => r.influenced_pipeline_eur)
-  }), (r) => r.campaign_id)
-    .map(([id, t]) => ({id, ...t, ...m.campaigns.get(id)}))
-    .filter((c) => c.channel !== "Unattributed" && c.influenced > 0);
-}
-
-export function touches(m, s, range) {
-  const f = filters(m, s);
-  const opps = m.opportunities.filter((o) => inRange(o.created_on, range) && f.campaign(o.campaign_id));
-  const bins = d3.range(0, 7).map((n) => ({n, label: n === 6 ? "6+" : String(n), count: 0}));
-  for (const o of opps) bins[Math.min(6, o.touches)].count++;
-  return {bins, median: d3.median(opps, (o) => o.touches), total: opps.length};
-}
-
 const dayDiff = (a, b) => (b - a) / 864e5;
-
-export function velocity(m, s, range) {
-  const f = filters(m, s);
-  const leadMql = m.leadVelocity.filter((r) => inRange(r.mql_on, range) && f.campaign(r.campaign_id) && r.lead_on).map((r) => dayDiff(r.lead_on, r.mql_on));
-  const mqlOpp = m.leadVelocity.filter((r) => inRange(r.opportunity_on, range) && f.campaign(r.campaign_id)).map((r) => dayDiff(r.mql_on, r.opportunity_on));
-  const oppClose = m.opportunities.filter((o) => o.is_closed && inRange(o.close_on, range) && f.campaign(o.campaign_id)).map((o) => dayDiff(o.created_on, o.close_on));
-  return [
-    {key: "lead_mql", label: "Lead to MQL", values: leadMql.filter((d) => d >= 0)},
-    {key: "mql_opp", label: "MQL to opportunity", values: mqlOpp.filter((d) => d >= 0)},
-    {key: "opp_close", label: "Opportunity to close", values: oppClose.filter((d) => d >= 0)}
-  ].map((d) => ({...d, median: d3.median(d.values)}));
-}
-
-export function timeInStage(m, s, range) {
-  const f = filters(m, s);
-  const rows = m.stageHistory.filter((h) => h.days_in_stage != null && STAGES.includes(h.stage_name) && inRange(h.entered_on, range) && f.campaign(h.campaign_id));
-  return STAGES.map((st) => {
-    const v = rows.filter((h) => h.stage_name === st).map((h) => h.days_in_stage);
-    return {stage: st, median: d3.median(v), n: v.length};
-  });
-}
 
 export function health(m, s, range) {
   const f = filters(m, s);
   const open = m.opportunities.filter((o) => !o.is_closed && f.campaign(o.campaign_id));
   const byStage = STAGES.map((st) => {
     const v = open.filter((o) => o.stage_name === st);
-    return {stage: st, amount: sum(v, (o) => o.amount_eur), count: v.length, stalled: v.filter((o) => o.is_stalled).length};
+    const st30 = v.filter((o) => o.is_stalled);
+    return {stage: st, amount: sum(v, (o) => o.amount_eur), count: v.length, stalled: st30.length, stalledAmount: sum(st30, (o) => o.amount_eur)};
   });
-  const transitions = d3.rollups(
-    m.stageHistory.filter((h) => h.previous_stage_name && inRange(h.entered_on, range) && f.campaign(h.campaign_id)),
-    (v) => ({count: v.length, regression: v[0].is_regression === 1}),
-    (h) => h.previous_stage_name,
-    (h) => h.stage_name
-  ).flatMap(([from, tos]) => tos.map(([to, t]) => ({from, to, ...t})));
   const stalled = open.filter((o) => o.is_stalled).map((o) => ({
     ...o,
     idle: Math.round(dayDiff(o.last_stage_change_on, m.asOf)),
     campaign: m.campaigns.get(o.campaign_id)
   })).sort((a, b) => b.idle - a.idle);
-  return {byStage, transitions, stalled, openTotal: sum(open, (o) => o.amount_eur), openCount: open.length};
+  return {byStage, stalled, openTotal: sum(open, (o) => o.amount_eur), openCount: open.length};
 }

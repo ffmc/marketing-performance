@@ -22,7 +22,11 @@ export function PipelineArea(el, m, getState, setState) {
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - M.b + 18})`)
     .selectAll("text").data(x.ticks(W < 560 ? d3.utcYear.every(1) : d3.utcMonth.every(6))).join("text")
     .attr("x", x).attr("text-anchor", "middle").text(d3.utcFormat(W < 560 ? "%Y" : "%b %Y"));
+  svg.append("g").selectAll("line").data(x.ticks(W < 560 ? d3.utcYear.every(1) : d3.utcMonth.every(6))).join("line").attr("class", "tick-mark")
+    .attr("x1", x).attr("x2", x).attr("y1", H - M.b).attr("y2", H - M.b + 5);
   const areasG = svg.append("g").attr("clip-path", `url(#${clipId})`);
+  svg.append("line").attr("class", "axis-line").attr("x1", M.l).attr("x2", W - M.r).attr("y1", H - M.b).attr("y2", H - M.b);
+  svg.append("line").attr("class", "axis-line").attr("x1", M.l).attr("x2", M.l).attr("y1", M.t).attr("y2", H - M.b);
   const cross = svg.append("line").attr("class", "crosshair").attr("y1", M.t).attr("y2", H - M.b).style("opacity", 0);
   const brushG = svg.append("g").attr("class", "brush");
 
@@ -49,6 +53,8 @@ export function PipelineArea(el, m, getState, setState) {
       .attr("x1", M.l).attr("x2", W - M.r).transition().duration(T).attr("y1", y).attr("y2", y);
     yAxis.selectAll("text").data(y.ticks(4), (d) => d).join("text").attr("x", M.l - 8).attr("dy", ".32em")
       .attr("text-anchor", "end").text(eur).transition().duration(T).attr("y", y);
+    yAxis.selectAll("line").data(y.ticks(4), (d) => d).join("line").attr("class", "tick-mark").attr("x1", M.l - 5).attr("x2", M.l)
+      .transition().duration(T).attr("y1", y).attr("y2", y);
 
     const sel = (k) => !s.channels.size || s.channels.has(k);
     areasG.selectAll("path").data(series, (d) => d.key).join("path")

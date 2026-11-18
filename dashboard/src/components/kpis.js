@@ -1,11 +1,12 @@
-import {d3, dur, EASE, eur, ratio, splitNumber, info} from "./core.js";
+import {d3, dur, EASE, eur, ratio, days, splitNumber, info} from "./core.js";
 import {kpis, kpiSeries, priorRange} from "./model.js";
 
 const DEFS = [
   {key: "pipeline", label: "Pipeline created", fmt: eur},
   {key: "won", label: "Won revenue", fmt: eur},
   {key: "ratio", label: "Pipeline to spend", fmt: ratio},
-  {key: "open", label: "Open pipeline", fmt: eur}
+  {key: "open", label: "Open pipeline", fmt: eur},
+  {key: "close", label: "Median days to close", fmt: days, lowerIsBetter: true}
 ];
 
 export function KPIs(el, m, getState) {
@@ -14,7 +15,7 @@ export function KPIs(el, m, getState) {
       <div class="kpi-head"><span>${d.label}</span>${info(d.key, d.label)}</div>
       <div class="kpi-value" aria-live="polite"></div>
       <div class="kpi-foot"><span class="delta"></span>
-        <svg class="spark" viewBox="0 0 96 36" preserveAspectRatio="none" aria-hidden="true"><path class="area"/><path class="line"/><circle class="end" r="3.5"/></svg>
+        <svg class="spark" viewBox="0 0 160 36" aria-hidden="true"><path class="area"/><path class="line"/><circle class="end" r="3.5"/></svg>
       </div>
     </article>`).join("");
   const prev = {}, lastLen = {};
@@ -32,12 +33,12 @@ export function KPIs(el, m, getState) {
 
       const change = pri[d.key] ? to / pri[d.key] - 1 : null;
       const delta = tile.querySelector(".delta");
-      delta.className = `delta ${change == null ? "" : change >= 0 ? "up" : "down"}`;
+      delta.className = `delta ${change == null ? "" : (change >= 0) !== !!d.lowerIsBetter ? "up" : "down"}`;
       delta.innerHTML = change == null ? "No prior period"
         : `<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5L9 7.5H1z" fill="currentColor"/></svg><b>${change >= 0 ? "+" : "−"}${Math.abs(change * 100).toFixed(0)}%</b> vs prior period`;
 
       const series = kpiSeries(m, s, s.range, d.key);
-      const x = d3.scaleLinear().domain([0, Math.max(1, series.length - 1)]).range([2, 92]);
+      const x = d3.scaleLinear().domain([0, Math.max(1, series.length - 1)]).range([2, 154]);
       const y = d3.scaleLinear().domain([0, d3.max(series) || 1]).range([33, 4]);
       const line = d3.line().x((_, i) => x(i)).y((v) => y(v)).curve(d3.curveMonotoneX);
       const area = d3.area().x((_, i) => x(i)).y0(36).y1((v) => y(v)).curve(d3.curveMonotoneX);

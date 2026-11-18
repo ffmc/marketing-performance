@@ -12,13 +12,6 @@ write_csv("""
         o.amount_eur,
         o.won_amount_eur,
         o.last_stage_change_at::date as last_stage_change_on,
-        iff(o.is_stalled, 1, 0) as is_stalled,
-        coalesce(t.touches, 0) as touches
+        iff(o.is_stalled, 1, 0) as is_stalled
     from {schema}.fct_opportunities o
-    left join (
-        select opportunity_id, count(*) as touches
-        from {schema}.fct_touchpoints
-        where not is_fallback
-        group by 1
-    ) t on o.opportunity_id = t.opportunity_id
 """)

@@ -12,7 +12,7 @@
 :root {
   --color-background: #F6F5F8; --color-surface: #FFFFFF; --color-surface-sunken: #EEECF2; --color-border: #E1DEE7; --color-grid: #EBE9F0;
   --color-text-primary: #311847; --color-text-secondary: #4E4560; --color-text-muted: #6B6478;
-  --color-accent: #85858A; --color-accent-text: #66666B; --color-focus-ring: #311847; --color-mark-muted: #948FA3;
+  --color-accent: #311847; --color-accent-text: #311847; --color-focus-ring: #311847; --color-mark-muted: #948FA3;
   --color-success: #1F7A4D; --color-danger: #B42318; --color-warning: #A15C00;
   --channel-webinar: #3581B8; --channel-paid-search: #EC4067; --channel-event: #7C4DB0; --channel-content: #CC7620; --channel-partner: #A01A7D; --channel-email: #3C96BF;
   --channel-text-webinar: #28699A; --channel-text-paid-search: #C42A52; --channel-text-event: #6A3D9C; --channel-text-content: #8F4F0A; --channel-text-partner: #A01A7D; --channel-text-email: #1F6F93;
@@ -144,9 +144,9 @@ tr.hover td { background: var(--color-surface-sunken); }
       <div class="kpi"><div class="kpi-head">Win rate <button class="info" type="button" aria-label="Definition">i</button></div><div class="kpi-value">27<span class="dim">.4%</span></div><span class="delta down"><b>−3%</b> vs prior 12 months</span></div>
       <span class="pop">Won deals divided by all closed deals (won plus lost) that closed in the period.</span>
     </div>
-    <h3>Section headline: hero and section</h3>
+    <h3>Section headline and section panel: hero, section title, sentence</h3>
     <p class="headline" style="font-size:var(--type-4xl-size);font-weight:800">Campaigns created <span class="num">€4.82M</span> of pipeline.</p>
-    <p class="headline" style="margin-top:var(--space-5)"><span class="ch" style="color:var(--channel-text-partner)">Partner</span> returns €11.2 of pipeline per euro spent.</p>
+    <div style="margin-top:var(--space-5);padding:var(--space-6);border-radius:var(--radius-card);background:var(--color-surface-sunken)"><p style="font:800 var(--type-3xl-size)/1.1 var(--font-display);letter-spacing:-.03em;margin:0 0 var(--space-2)">Spend efficiency</p><p class="headline" style="font-size:var(--type-xl-size);margin:0"><span class="ch" style="color:var(--channel-text-partner)">Partner</span> returns €11.2 of pipeline per euro spent.</p></div>
     <h3>Legend: categorical, size; deselected</h3>
     <div class="legend" id="legend"></div>
     <h3>Chart marks</h3>
@@ -189,7 +189,7 @@ tr.hover td { background: var(--color-surface-sunken); }
         <li>Show "Not recorded" for missing costs.</li></ul></div>
       <div><h3>Don't</h3><ul>
         <li>Use Inter, Geist, Bricolage Grotesque or Space Grotesk.</li>
-        <li>Wrap sections in cards or use coloured left-border cards.</li>
+        <li>Nest panels or use coloured left-border cards; one grey panel per analysis is the only container.</li>
         <li>Use gradients, glassmorphism or glow shadows.</li>
         <li>Use the accent as a channel colour.</li>
         <li>Add a second y-axis, pie charts or ring gauges.</li>

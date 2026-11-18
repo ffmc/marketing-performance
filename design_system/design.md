@@ -11,8 +11,8 @@ colors:
   textPrimary:   "#311847"
   textSecondary: "#4E4560"
   textMuted:     "#6B6478"
-  accent:        "#85858A"
-  accentText:    "#66666B"
+  accent:        "#311847"
+  accentText:    "#311847"
   focusRing:     "#311847"
   markMuted:     "#948FA3"
   success:       "#1F7A4D"
@@ -86,9 +86,13 @@ components:
     states: [hidden, visible]
     tokens: { background: "{colors.textPrimary}", text: "{colors.background}", radius: "{radius.control}", trigger: 18px, hitArea: 44px }
   sectionHeadline:
-    variants: [hero, section]
+    variants: [hero, sectionTitle, sectionSentence]
     states: [default]
-    tokens: { hero: "{typography.scale.4xl}", section: "{typography.scale.2xl}", number: "{colors.accentText}", channelName: "{colors.channelText.*}" }
+    tokens: { hero: "{typography.scale.4xl}", sectionTitle: "{typography.scale.3xl}", sectionSentence: "{typography.scale.xl}", number: "{colors.accentText}", channelName: "{colors.channelText.*}" }
+  sectionPanel:
+    variants: [default]
+    states: [default]
+    tokens: { background: "{colors.surfaceSunken}", radius: "{radius.card}", padding: "{spacing.7}", paddingPhone: "{spacing.5}" }
   legend:
     variants: [categorical, size]
     states: [default, deselected]
@@ -125,7 +129,7 @@ components:
 A public, single-page data story about which Fieldnote campaigns create pipeline that closes. The audience is a hiring manager or analytics lead arriving from a LinkedIn post, often on a phone, who should understand the project in two minutes and then want to explore. Each section opens with a headline sentence computed from the data, so the reader gets the finding before the chart. The page should feel like a well-edited financial report: calm, exact, and confident enough to state a conclusion. It must never look like a SaaS admin template or an AI-generated landing page.
 
 ## Colors
-Light theme only. Neutrals lean cool, with a faint lavender cast, and the text colour is the palette's dark amethyst, so the page reads as one family instead of black on white. Grey is the single UI accent: sparklines, neutral bars, headline numbers (in the darker `accentText` step so they meet 4.5:1) and nothing else. It is never a channel colour. The six channel colours encode identity only, in a fixed order that passed the CVD validator for adjacent pairs; every channel has a separate text step that meets 4.5:1, so a channel name can be written in its colour. When the reader selects channels, unselected channels fall back to `markMuted`. Status colours (success, danger, warning) are reserved for deltas, test results and stage regressions and always appear with an icon or a sign.
+Light theme only. Neutrals lean cool, with a faint lavender cast, and the text colour is the palette's dark amethyst, so the page reads as one family instead of black on white. The dark amethyst is the single UI accent: sparklines, neutral bars, headline numbers (in the darker `accentText` step so they meet 4.5:1) and nothing else. It is never a channel colour. The six channel colours encode identity only, in a fixed order that passed the CVD validator for adjacent pairs; every channel has a separate text step that meets 4.5:1, so a channel name can be written in its colour. When the reader selects channels, unselected channels fall back to `markMuted`. Status colours (success, danger, warning) are reserved for deltas, test results and stage regressions and always appear with an icon or a sign.
 
 ## Typography
 Schibsted Grotesk, drawn for a news publisher, carries headlines and big numbers: it reads as journalism and makes the sentence-led layout work. IBM Plex Sans sets body text, controls and tables. IBM Plex Mono sets axis ticks, tooltip values and table numbers, with tabular figures so numbers don't shift width as they count. The scale uses a 1.25 ratio. `4xl` is only for the hero sentence, `2xl` for section headlines and KPI values, `lg` for sub-headings inside a section. Display sizes get negative tracking; uppercase eyebrows get +0.08em.
@@ -137,7 +141,7 @@ One column of sections inside a 1240px container with a fluid gutter. Each secti
 Almost flat. Surfaces separate with a 1px border plus one soft shadow tinted with the text colour (`elevation.sm`), used only on tooltips, the segmented control thumb and the table. No glows, no blur panels.
 
 ## Shapes
-Radius varies by role. Data marks use 4px (bar ends, rounded toward the value). Controls use 10px. Panels like the table use 14px. Pills (chips, trust badge, delta) are fully round. The editorial layout has no cards around sections; a border marks something you can interact with or scroll, never a section.
+Radius varies by role. Data marks use 4px (bar ends, rounded toward the value). Controls use 10px. Panels like the table use 14px. Pills (chips, trust badge, delta) are fully round. Each analysis sits in one quiet grey panel (`sectionPanel`, radius `card`) that holds its title, sentence and charts together, so the reader sees where one question ends and the next begins. A border marks something you can interact with or scroll, never a section.
 
 ## Components
 **Filter bar.** Sticky under the safe-area inset. Holds the country segmented control and the channel chips, which scroll horizontally on a phone. It is the only global control; every chart, number and sentence responds to it.
@@ -150,7 +154,9 @@ Radius varies by role. Data marks use 4px (bar ends, rounded toward the value). 
 
 **Definition popover.** An 18px "i" trigger with a 44px hit area. Shows the metric's definition from `docs/metrics.md` on hover or focus.
 
-**Section headline.** A sentence built from live data. Numbers use `accentText`; channel names use their `channelText` colour. It must stay true for every filter combination.
+**Section panel.** One flat `surfaceSunken` panel per analysis, 48px padding (20px on a phone), no border and no shadow. Tables, search fields and tooltips inside it stay on `surface` so they read as controls. The hero is not in a panel.
+
+**Section headline.** Each analysis has a large section title (`3xl`, display, 800: "Funnel", "Spend efficiency") above a sentence (`xl`) built from live data. Numbers use `accentText`; channel names use their `channelText` colour. It must stay true for every filter combination.
 
 **Legend.** Above the chart, `sm` text in `textPrimary`, 12px swatches. Deselected channels fade to 45%.
 
@@ -177,7 +183,7 @@ Radius varies by role. Data marks use 4px (bar ends, rounded toward the value). 
 
 **Don't**
 - Don't use Inter, Geist, Bricolage Grotesque or Space Grotesk; they read as AI defaults.
-- Don't wrap sections in cards, use coloured left-border cards, or build a 3-across icon card grid.
+- Don't nest panels, use coloured left-border cards, or build a 3-across icon card grid. One grey panel per analysis is the only container.
 - Don't use gradients, glassmorphism or coloured glow shadows.
 - Don't use the accent as a channel colour, or a channel colour as UI decoration.
 - Don't add a second y-axis, a pie chart, or ring gauges.

@@ -1,7 +1,7 @@
-// Sortable table inside a scrolling panel with a sticky header. Columns: {k, l, txt?, v(row), f(row)}.
+// Sortable table inside a scrolling panel with a sticky header. Columns: {k, l, txt?, w?, v(row), f(row)}.
 export function Table(el, {columns, rows, sortKey, onHover, empty, footnote}) {
   el.innerHTML = `
-    <div class="tb-scroll"><table class="tb"><thead><tr>${columns.map((c) => `<th scope="col" class="${c.txt ? "" : "n"}" data-k="${c.k}"><button type="button">${c.l}<span class="sort" aria-hidden="true"></span></button></th>`).join("")}</tr></thead><tbody></tbody></table></div>
+    <div class="tb-scroll"><table class="tb"><thead><tr>${columns.map((c) => `<th scope="col" class="${c.txt ? "" : "n"}" data-k="${c.k}"${c.w ? ` style="width: ${c.w}"` : ""}><button type="button">${c.l}<span class="sort" aria-hidden="true"></span></button></th>`).join("")}</tr></thead><tbody></tbody></table></div>
     ${footnote ? `<p class="footnote tb-count"></p>` : ""}`;
   let key = sortKey, dir = -1;
   const tbody = el.querySelector("tbody");
