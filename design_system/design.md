@@ -17,7 +17,7 @@ colors:
   markMuted:     "#948FA3"
   onAccent:      "#FFFFFF"                     # text on amethyst fills (ERD table headers)
   scrimDark:     "rgb(49 24 71 / 0.82)"        # label tooltip surface: the text colour at 82%
-  scrimLight:    "rgb(255 255 255 / 0.94)"      # chart tooltip surface
+  scrimLight:    "rgb(255 255 255 / 0.86)"      # chart tooltip surface
   success:       "#1F7A4D"
   danger:        "#B42318"
   warning:       "#A15C00"
