@@ -73,6 +73,33 @@ toc: false
 
 <section class="section">
   <div class="copy">
+    <h2 class="section-title">Pipeline that closes</h2>
+    <h3 class="sentence"><span data-t="qBest"></span> wins <span class="hl" data-t="qBestRate"></span> of the deals it closes; <span data-t="qWorst"></span> wins <span data-t="qWorstRate"></span>.</h3>
+    <p>Pipeline only counts when it turns into revenue. <span data-t="wpeBest"></span> returns the most won revenue per euro spent, at <span data-t="wpeBestVal"></span>. <span data-t="qOpen"></span> of the opportunities created in the period are still open, so recent months can still move. <button class="info inline" type="button" data-info="winrate">i</button></p>
+  </div>
+  <div class="chart" data-c="quality"></div>
+</section>
+
+<section class="section">
+  <div class="copy">
+    <h2 class="section-title">Attribution</h2>
+    <h3 class="sentence"><span data-t="lin"></span> grows <span class="hl" data-t="linPct"></span> when credit is shared across every touch.</h3>
+    <p>First touch decides the budget. Last touch and linear show which channels help close deals that other channels found. <button class="info inline" type="button" data-info="attribution">i</button></p>
+  </div>
+  <div class="chart" data-c="attribution"></div>
+</section>
+
+<section class="section">
+  <div class="copy">
+    <h2 class="section-title">Speed</h2>
+    <h3 class="sentence">Deals take a median of <span class="hl" data-t="close"></span> from opportunity to close.</h3>
+    <p>Leads reach MQL in a median <span data-t="leadMql"></span>. Of the sales stages, <span data-t="slowest"></span> holds deals longest, at <span data-t="slowestDays"></span>. <button class="info inline" type="button" data-info="velocity stage">i</button></p>
+  </div>
+  <div class="chart" data-c="velocity"></div>
+</section>
+
+<section class="section">
+  <div class="copy">
     <h2 class="section-title">Pipeline health</h2>
     <h3 class="sentence"><span class="hl" data-t="stalledCount"></span> open deals worth <span data-t="stalledAmount"></span> haven't moved in 30 days.</h3>
     <p>Open pipeline today is <span data-t="openTotal"></span>. The list below shows the deals to chase first. <button class="info inline" type="button" data-info="stalled">i</button></p>
@@ -103,14 +130,17 @@ toc: false
 ```js
 import {app} from "./components/app.js";
 
-const [campaigns, campaignMonths, opportunities, meta, models, docs] = await Promise.all([
+const [campaigns, campaignMonths, attribution, opportunities, stageHistory, leadVelocity, meta, models, docs] = await Promise.all([
   FileAttachment("data/campaigns.csv").csv({typed: true}),
   FileAttachment("data/campaign_months.csv").csv({typed: true}),
+  FileAttachment("data/attribution.csv").csv({typed: true}),
   FileAttachment("data/opportunities.csv").csv({typed: true}),
+  FileAttachment("data/stage_history.csv").csv({typed: true}),
+  FileAttachment("data/lead_velocity.csv").csv({typed: true}),
   FileAttachment("data/meta.json").json(),
   FileAttachment("data/models.json").json(),
   FileAttachment("data/docs.json").json()
 ]);
 
-app(document.body, {campaigns, campaignMonths, opportunities, meta, models, docs});
+app(document.body, {campaigns, campaignMonths, attribution, opportunities, stageHistory, leadVelocity, meta, models, docs});
 ```

@@ -1,4 +1,4 @@
-import {d3, CHANNELS, chVar, chName, dur, EASE, eur, fmtMonth, svgIn, tooltip} from "./core.js";
+import {d3, DIMMED, CHANNELS, chVar, chName, dur, EASE, eur, fmtMonth, svgIn, tooltip} from "./core.js";
 import {pipelineByChannelMonth, defaultRange} from "./model.js";
 
 export function PipelineArea(el, m, getState, setState) {
@@ -60,10 +60,10 @@ export function PipelineArea(el, m, getState, setState) {
     areasG.selectAll("path").data(series, (d) => d.key).join("path")
       .attr("class", "area-band")
       .style("fill", (d) => (sel(d.key) ? chVar(d.key) : "var(--color-mark-muted)"))
-      .style("opacity", (d) => (sel(d.key) || d.key === "Unattributed" ? 1 : 0.45))
+      .style("opacity", (d) => (sel(d.key) || d.key === "Unattributed" ? 1 : DIMMED))
       .transition().duration(T).ease(EASE).attr("d", area);
 
-    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = sel(n.dataset.ch) ? 1 : 0.45));
+    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = sel(n.dataset.ch) ? 1 : DIMMED));
     brushG.call(brush.move, [x(s.range[0]), x(s.range[1])]);
     el.querySelector(".range-label").textContent = `Selected: ${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}`;
   }

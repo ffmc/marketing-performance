@@ -1,4 +1,4 @@
-import {d3, CHANNELS, chVar, chName, dur, EASE, int, pct, svgIn, tooltip} from "./core.js";
+import {d3, DIMMED, CHANNELS, chVar, chName, dur, EASE, int, pct, svgIn, tooltip} from "./core.js";
 import {funnel} from "./model.js";
 import {sankey, sankeyLeft, sankeyLinkHorizontal} from "npm:d3-sankey";
 
@@ -73,7 +73,7 @@ export function Funnel(el, m, getState) {
         : `<h4>Did not move on from ${from.label}</h4><dl><dt>People</dt><dd>${int(d.target.n)}</dd><dt>Share of ${from.label}</dt><dd>${pct(from.n ? d.target.n / from.n : null)}</dd></dl>`;
       tip.show(html, px, py, {width: W, height: H});
     }).on("pointerleave", function () { linksG.classed("hovering", false); d3.select(this).classed("is-hover", false); tip.hide(); });
-    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = chans.includes(n.dataset.ch) ? 1 : 0.45));
+    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = chans.includes(n.dataset.ch) ? 1 : DIMMED));
 
     const nd = nodesG.selectAll("rect").data(nodes, (d) => d.id).join("rect").attr("class", (d) => `sk-node ${d.kind}`).attr("rx", 2);
     (first || mode === "play" ? nd : nd.transition().duration(T).ease(EASE))

@@ -12,6 +12,9 @@
   --color-accent-text: #311847;
   --color-focus-ring: #311847;
   --color-mark-muted: #948FA3;
+  --color-on-accent: #FFFFFF;
+  --color-scrim-dark: rgb(49 24 71 / 0.82);
+  --color-scrim-light: rgb(255 255 255 / 0.8);
   --color-success: #1F7A4D;
   --color-danger: #B42318;
   --color-warning: #A15C00;
@@ -30,20 +33,39 @@
   --channel-text-email: #1F6F93;
 
   --elevation-sm: 0 1px 2px rgb(49 24 71 / .05), 0 8px 24px -12px rgb(49 24 71 / .12);
+  --elevation-md: 0 24px 48px -16px rgb(49 24 71 / .35);
+  --elevation-node: 0 6px 14px rgb(49 24 71 / .10);
 
   --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --type-xs-size: .75rem;
-  --type-sm-size: .875rem;
-  --type-base-size: 1rem;
-  --type-lg-size: 1.25rem;
-  --type-xl-size: 1.563rem;
-  --type-2xl-size: 1.953rem;
-  --type-3xl-size: 2.441rem;
-  --type-4xl-size: 3.052rem;
+  --type-xs-size: .75rem; --type-xs-line: 1.45; --type-xs-weight: 400; --type-xs-tracking: 0;
+  --type-sm-size: .875rem; --type-sm-line: 1.45; --type-sm-weight: 400; --type-sm-tracking: 0;
+  --type-base-size: 1rem; --type-base-line: 1.5; --type-base-weight: 400; --type-base-tracking: 0;
+  --type-lg-size: 1.25rem; --type-lg-line: 1.3; --type-lg-weight: 700; --type-lg-tracking: -.01em;
+  --type-xl-size: 1.563rem; --type-xl-line: 1.2; --type-xl-weight: 700; --type-xl-tracking: -.02em;
+  --type-2xl-size: 1.953rem; --type-2xl-line: 1.1; --type-2xl-weight: 700; --type-2xl-tracking: -.025em;
+  --type-3xl-size: 2.441rem; --type-3xl-line: 1.05; --type-3xl-weight: 700; --type-3xl-tracking: -.03em;
+  --type-4xl-size: 3.052rem; --type-4xl-line: 1.05; --type-4xl-weight: 800; --type-4xl-tracking: -.03em;
+  --type-data-size: .75rem; --type-data-line: 1.3; --type-data-weight: 400; --type-data-tracking: 0;
 
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-body: 1.45;
+  --leading-relaxed: 1.5;
+
+  --tracking-tag: .04em;
+  --tracking-label: .06em;
+  --tracking-eyebrow: .08em;
+
+  --space-0: 2px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -53,16 +75,80 @@
   --space-7: 48px;
   --space-8: 80px;
 
+  --radius-micro: 2px;
   --radius-mark: 4px;
+  --radius-inner: 6px;
   --radius-control: 10px;
   --radius-panel: 14px;
   --radius-card: 20px;
   --radius-pill: 999px;
 
+  --border-hairline: 1px;
+  --border-strong: 2px;
+
+  --stroke-fine: .75px;
+  --stroke-hairline: 1px;
+  --stroke-regular: 1.5px;
+  --stroke-strong: 2px;
+  --stroke-heavy: 3px;
+
+  --opacity-faint: .12;
+  --opacity-subtle: .25;
+  --opacity-dimmed: .35;
+  --opacity-muted: .5;
+  --opacity-strong: .75;
+  --opacity-solid: .95;
+
+  --size-hit: 44px;
+  --size-control: 36px;
+  --size-control-sm: 32px;
+  --size-table-head: 56px;
+  --size-icon: 18px;
+  --size-mark: 22px;
+  --size-swatch: 12px;
+  --size-swatch-lg: 16px;
+  --size-dot: 10px;
+  --size-dot-sm: 5px;
+  --size-dot-md: 7px;
+  --size-chevron: 8px;
+  --size-mark-min: 4px;
+  --size-mark-max: 15px;
+  --size-mark-max-phone: 11px;
+  --size-tip-min: 210px;
+  --size-tip-max: min(280px, 70vw);
+  --size-popover: min(640px, calc(100vw - var(--space-6)));
+  --size-popover-height: min(70vh, 640px);
+  --size-table-max: min(520px, 70vh);
+  --size-table-min-phone: 880px;
+  --size-erd-min-phone: 760px;
+  --size-search: 420px;
+  --size-search-basis: 260px;
+  --size-column-min: 260px;
+  --size-spark-width: 160px;
+  --size-spark-height: 36px;
+
+  --shift-sm: 2px;
+  --shift-md: 4px;
+  --shift-lg: 6px;
+
+  --z-sticky: 1;
+  --z-chart-tip: 3;
+  --z-filters: 5;
+  --z-label: 6;
+  --z-header: 8;
+  --z-safe-area: 10;
+  --z-popover: 20;
+
+  --effect-blur: 8px;
+  --effect-glow: 3px;
+
   --motion-fast: 120ms;
   --motion-ui: 180ms;
   --motion-data: 520ms;
   --motion-draw: 800ms;
+  --motion-stagger: 60ms;
+  --motion-lead: 380ms;
+  --motion-flow: 900ms;
   --ease-out: cubic-bezier(.2, .7, .2, 1);
 
   --layout-max-width: 1240px;
@@ -79,5 +165,8 @@
     --motion-ui: 0ms;
     --motion-data: 0ms;
     --motion-draw: 0ms;
+    --motion-stagger: 0ms;
+    --motion-lead: 0ms;
+    --motion-flow: 0ms;
   }
 }

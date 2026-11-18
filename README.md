@@ -6,6 +6,8 @@ Salesforce data lands in Snowflake, dbt cleans, models and tests it, and Airflow
 
 **Dashboard:** [ffmc.github.io/marketing-performance](https://ffmc.github.io/marketing-performance/)
 
+[![The dashboard: key metrics, pipeline by channel over time and the campaign funnel](docs/dashboard.jpg)](https://ffmc.github.io/marketing-performance/)
+
 **Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan, Snowflake setup, the Salesforce data simulator, the raw loader, the Silver notebook, dbt models and tests, the Airflow schedule and the dashboard. Next: review and polish (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
 
 ## The business case

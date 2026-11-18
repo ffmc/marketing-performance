@@ -55,9 +55,12 @@ export function reveal(el, comp) {
   go.observe(el);
 }
 
+export const token = (n) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));
+export const DIMMED = "var(--opacity-muted)";
+
 export function tooltip(container) {
   const tip = document.createElement("div");
-  tip.className = "tip";
+  tip.className = "chart-tip";
   tip.style.opacity = 0;
   container.append(tip);
   let timer;
@@ -65,12 +68,13 @@ export function tooltip(container) {
     show(html, x, y, bounds) {
       tip.innerHTML = html;
       const tw = tip.offsetWidth, th = tip.offsetHeight;
-      let left = x + 16, top = y - th / 2;
-      if (left + tw > bounds.width) left = x - tw - 16;
+      const gap = token("--space-4");
+      let left = x + gap, top = y - th / 2;
+      if (left + tw > bounds.width) left = x - tw - gap;
       tip.style.left = `${Math.max(0, left)}px`;
       tip.style.top = `${Math.max(0, Math.min(bounds.height - th, top))}px`;
       clearTimeout(timer);
-      timer = setTimeout(() => (tip.style.opacity = 1), dur(60));
+      timer = setTimeout(() => (tip.style.opacity = 1), token("--motion-stagger"));
     },
     hide() { clearTimeout(timer); tip.style.opacity = 0; }
   };
@@ -90,6 +94,10 @@ export const DEFINITIONS = {
   close: "Median days between an opportunity being created and closed, for opportunities closed in the period.",
   funnel: "Cohort view: people who joined a campaign in the period, and every stage they ever reached. Conversion = people reaching the later stage / people reaching the earlier one.",
   cpl: "Campaign cost divided by the number of leads, MQLs or opportunities.",
-  stalled: "Open opportunity with no stage change in the last 30 days."
+  stalled: "Open opportunity with no stage change in the last 30 days.",
+  winrate: "Won opportunities divided by closed opportunities, for opportunities created in the period. Channels with fewer than five closed deals are not rated.",
+  attribution: "First touch credits the source campaign. Last touch credits the latest touchpoint before the deal was created. Linear splits the amount evenly across every touchpoint.",
+  velocity: "Median days between the two stages, by the month the later stage was reached.",
+  stage: "Days between consecutive stage changes of the same opportunity."
 };
-export const info = (key, label) => `<button class="info" type="button" aria-label="Definition of ${label}: ${DEFINITIONS[key]}" data-def="${DEFINITIONS[key]}">i</button>`;
+export const info = (key, label) => `<button class="info" type="button" aria-label="Definition of ${label}: ${DEFINITIONS[key]}" data-tip="${DEFINITIONS[key]}">i</button>`;

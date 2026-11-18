@@ -1,4 +1,4 @@
-import {d3, CHANNELS, COUNTRIES, DEFINITIONS, chVar, chName, eur, ratio, pct, int, fmtMonth, fmtDate, reveal} from "./core.js";
+import {d3, CHANNELS, COUNTRIES, DEFINITIONS, chVar, chName, eur, ratio, pct, int, days, fmtMonth, fmtDate, reveal} from "./core.js";
 import * as model from "./model.js";
 import {KPIs} from "./kpis.js";
 import {PipelineArea} from "./area.js";
@@ -8,6 +8,9 @@ import {Table} from "./table.js";
 import {OpenByStage} from "./health.js";
 import {Lineage} from "./lineage.js";
 import {DocPopover} from "./docpop.js";
+import {Quality} from "./quality.js";
+import {Velocity} from "./speed.js";
+import {Attribution, MODELS} from "./attribution.js";
 
 const monthParam = d3.utcFormat("%Y-%m"), parseMonth = d3.utcParse("%Y-%m");
 
@@ -19,6 +22,7 @@ function readUrl(m) {
     country: ["ES", "GB", "US"].includes(q.get("country")) ? q.get("country") : "All",
     channels: new Set((q.get("channels") ?? "").split(",").filter((c) => CHANNELS.includes(c))),
     range: valid ? range : model.defaultRange(m),
+    model: MODELS.some(([k]) => k === q.get("model")) ? q.get("model") : "first_touch",
     query: ""
   };
 }
@@ -27,6 +31,7 @@ function writeUrl(s, m) {
   const q = new URLSearchParams();
   if (s.country !== "All") q.set("country", s.country);
   if (s.channels.size) q.set("channels", [...s.channels].join(","));
+  if (s.model !== "first_touch") q.set("model", s.model);
   const [a, b] = model.defaultRange(m);
   if (+s.range[0] !== +a || +s.range[1] !== +b) { q.set("from", monthParam(s.range[0])); q.set("to", monthParam(s.range[1])); }
   history.replaceState(null, "", `${location.pathname}${q.size ? `?${q}` : ""}${location.hash}`);
@@ -121,6 +126,9 @@ export function app(root, raw) {
         empty: () => `No campaigns match${state.query ? ` "${state.query.replace(/[<>&"]/g, "")}"` : ""}. Clear the search or pick other channels.`,
         footnote: (n) => `${int(n)} campaigns active in the period. Scroll the table to see them all; hover a row to find it in the chart above.`
       }),
+      quality: Quality(at("quality"), m, getState),
+      velocity: Velocity(at("velocity"), m, getState),
+      attribution: Attribution(at("attribution"), m, getState, setState),
       open: OpenByStage(at("open"), m, getState),
       stalled: Table(at("stalled"), {
         sortKey: "idle",
@@ -153,6 +161,14 @@ export function app(root, raw) {
     const h = model.health(m, s, s.range);
     const stalledAmount = d3.sum(h.stalled, (o) => o.amount_eur);
     const growth = prior.pipeline ? k.pipeline / prior.pipeline - 1 : null;
+    const q = model.quality(m, s, s.range);
+    const wr = q.rows.filter((r) => r.winRate != null).sort((a, b) => b.winRate - a.winRate);
+    const wpe = q.rows.filter((r) => r.wonPerEur != null).sort((a, b) => b.wonPerEur - a.wonPerEur);
+    const vel = model.velocity(m, s, s.range);
+    const slowest = model.timeInStage(m, s, s.range).filter((d) => d.median != null).sort((a, b) => b.median - a.median)[0];
+    const att = model.attributionByChannel(m, s, s.range);
+    // Channels under 5% of sourced pipeline are left out so a tiny base cannot produce a four-digit headline.
+    const lin = CHANNELS.filter((c) => att.first_touch.get(c) >= 0.05 * att.total).map((c) => [c, att.linear.get(c) / att.first_touch.get(c) - 1]).sort((a, b) => b[1] - a[1])[0] ?? [CHANNELS[0], 0];
     const t = {
       scope: s.country === "All" ? "Spain, the UK and the US" : COUNTRIES[s.country],
       period: `${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}`,
@@ -166,6 +182,19 @@ export function app(root, raw) {
       bestRatio: eff[0] ? `€${eff[0].ratio.toFixed(1)}` : "–",
       worst: eff.at(-1) ? chName(eff.at(-1).channel) : "–",
       worstRatio: eff.at(-1) ? `€${eff.at(-1).ratio.toFixed(1)}` : "–",
+      qBest: wr[0] ? chName(wr[0].channel) : "–",
+      qBestRate: wr[0] ? pct(wr[0].winRate, 0) : "–",
+      qWorst: wr.at(-1) ? chName(wr.at(-1).channel) : "–",
+      qWorstRate: wr.at(-1) ? pct(wr.at(-1).winRate, 0) : "–",
+      wpeBest: wpe[0] ? chName(wpe[0].channel) : "–",
+      wpeBestVal: wpe[0] ? `€${wpe[0].wonPerEur.toFixed(1)}` : "–",
+      qOpen: pct(q.total ? q.open / q.total : null, 0),
+      close: days(vel[2].median),
+      leadMql: days(vel[0].median),
+      slowest: slowest ? slowest.stage : "–",
+      slowestDays: slowest ? days(slowest.median) : "–",
+      lin: chName(lin[0]),
+      linPct: pct(Math.max(0, lin[1]), 0),
       stalledCount: int(h.stalled.length),
       stalledAmount: eur(stalledAmount),
       openTotal: eur(h.openTotal)

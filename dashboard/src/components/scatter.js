@@ -1,4 +1,4 @@
-import {d3, CHANNELS, chVar, chName, dur, EASE, eur, ratio, svgIn, tooltip, fmtMonth} from "./core.js";
+import {d3, DIMMED, token, CHANNELS, chVar, chName, dur, EASE, eur, ratio, svgIn, tooltip, fmtMonth} from "./core.js";
 
 export const matchQuery = (c, q) => !q || c.topic.toLowerCase().includes(q) || c.channel.toLowerCase().includes(q) || (c.country ?? "").toLowerCase() === q;
 
@@ -13,7 +13,7 @@ export function Scatter(el, getCampaigns, getState) {
   svg.attr("role", "img").attr("aria-label", "Campaign cost against pipeline created");
   const M = {t: 16, r: 36, b: 40, l: 56};
   const x = d3.scaleLog().range([M.l, W - M.r]), y = d3.scaleLog().range([H - M.b, M.t]);
-  const r = d3.scaleSqrt().range([4, W < 500 ? 11 : 15]);
+  const r = d3.scaleSqrt().range([token("--size-mark-min"), token(W < 500 ? "--size-mark-max-phone" : "--size-mark-max")]);
   const tip = tooltip(wrap);
   const gridG = svg.append("g"), xAxis = svg.append("g").attr("class", "axis"), yAxis = svg.append("g").attr("class", "axis");
   const refs = svg.append("g");
@@ -68,7 +68,7 @@ export function Scatter(el, getCampaigns, getState) {
       merged.interrupt().transition().duration(T).ease(EASE).attr("cx", (d) => x(d.cost)).attr("cy", (d) => y(d.pipeline)).attr("r", (d) => r(d.won));
     }
     delaunay = d3.Delaunay.from(visible, (d) => x(d.cost), (d) => y(d.pipeline));
-    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = !s.channels.size || s.channels.has(n.dataset.ch) ? 1 : 0.45));
+    el.querySelectorAll(".legend [data-ch]").forEach((n) => (n.style.opacity = !s.channels.size || s.channels.has(n.dataset.ch) ? 1 : DIMMED));
     const noCost = all.filter((c) => c.cost == null).length;
     note.textContent = `${visible.length} campaigns with cost and pipeline in ${fmtMonth(s.range[0])} to ${fmtMonth(s.range[1])}. Dashed lines mark 1×, 5×, 10× and 20× pipeline to spend.${noCost ? ` ${noCost} campaigns have no recorded cost and are not plotted.` : ""}`;
   }
