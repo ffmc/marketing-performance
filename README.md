@@ -8,7 +8,7 @@ Salesforce data lands in Snowflake, dbt cleans, models and tests it, and Airflow
 
 [![The dashboard: key metrics, pipeline by channel over time and the campaign funnel](docs/dashboard.jpg)](https://ffmc.github.io/marketing-performance/)
 
-**Status: in progress.** Done so far: the requirements, metric definitions, source data spec, build plan, Snowflake setup, the Salesforce data simulator, the raw loader, the Silver notebook, dbt models and tests, the Airflow schedule and the dashboard. Next: review and polish (see the [build guide](docs/build-guide.md)). It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
+It's the companion to [saas-revenue-analytics](https://github.com/ffmc/saas-revenue-analytics), for the same company.
 
 ## The business case
 
@@ -79,7 +79,3 @@ ECB exchange rates ───┴─> Snowflake RAW ─> SILVER (notebooks) ─> d
 | `docs/` | [Brief](docs/brief.md), [metric definitions](docs/metrics.md), [source data](docs/source-data.md), [build guide](docs/build-guide.md) (open [build-guide.html](docs/build-guide.html) in a browser to tick off steps), [setup](docs/setup.md) |
 
 Salesforce data is simulated. Exchange rates are real.
-
-## Run it yourself
-
-The setup steps and commands are in [docs/setup.md](docs/setup.md).

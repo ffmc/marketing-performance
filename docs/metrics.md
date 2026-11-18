@@ -1,6 +1,6 @@
 # Metric definitions
 
-Draft for agreement with the CMO. The marts implement exactly these; anything not here doesn't go on a dashboard.
+Agreed with the CMO. The marts implement exactly these; anything not here doesn't go on a dashboard.
 
 ## Attribution
 Each lead and contact is attributed to one **source campaign**: its earliest touchpoint (defined under Touchpoints). If it has none, its earliest membership by `CreatedDate`. An opportunity inherits the source campaign of its primary contact role, falling back to `Opportunity.CampaignId`, then to `Unattributed`. Pipeline is attributed once, to one campaign, so campaign totals add up to the company total. Records with `IsDeleted = true` are ignored everywhere.

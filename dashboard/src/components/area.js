@@ -76,7 +76,7 @@ export function PipelineArea(el, m, getState, setState) {
     cross.attr("x1", x(mo)).attr("x2", x(mo)).style("opacity", 1);
     const total = d3.sum(data.keys, (k) => row[k]);
     tip.show(`<h4>${fmtMonth(mo)}</h4><dl>${[...data.keys].reverse().filter((k) => row[k] > 0)
-      .map((k) => `<dt>${k === "Unattributed" ? k : chName(k)}</dt><dd>${eur(row[k])}</dd>`).join("")}<dt><b>Total</b></dt><dd><b>${eur(total)}</b></dd></dl>`,
+      .map((k) => `<dt>${k === "Unattributed" ? k : chName(k)}</dt><dd>${eur(row[k])}</dd>`).join("")}<dt class="total">Total</dt><dd class="total">${eur(total)}</dd></dl>`,
       x(mo), M.t + 40, {width: W, height: H});
   }).on("pointerleave.tip", () => { cross.style("opacity", 0); tip.hide(); });
 

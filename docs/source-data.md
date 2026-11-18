@@ -21,7 +21,7 @@ Each object is extracted daily on `SystemModstamp`, so a record is delivered aga
 | `RAW.SALESFORCE.OPPORTUNITY_HISTORY` | stage change | `Id`, `OpportunityId`, `StageName`, `Amount`, `CreatedDate` |
 | `RAW.SALESFORCE.USERS` | sales rep | `Id`, `Name`, `UserRoleId`, `IsActive` |
 
-## Planned quirks
+## Quirks
 1. **Latest state.** Records are re-delivered on every change; pick the latest per `Id`.
 2. **Duplicate leads.** About 2% of leads are created twice with the same email (form resubmits), with different `Id`s.
 3. **Lead conversion.** A converted lead stops changing and its history continues on the contact and opportunity, so the funnel has to stitch the two.

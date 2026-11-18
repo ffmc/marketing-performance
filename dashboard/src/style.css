@@ -155,6 +155,8 @@ button { font: inherit; color: inherit; }
 .chart-tip .meta { color: var(--color-text-muted); margin-bottom: var(--space-2); }
 .chart-tip dl { display: grid; grid-template-columns: 1fr auto; gap: var(--space-0) var(--space-4); margin: var(--space-2) 0 0; }
 .chart-tip dt { color: var(--color-text-secondary); } .chart-tip dd { margin: 0; text-align: right; font-family: var(--font-data); color: var(--color-text-primary); }
+.chart-tip dt .chname { font-weight: var(--weight-regular); }
+.chart-tip .total { padding-top: var(--space-1); border-top: var(--border-hairline) solid var(--color-border); font-weight: var(--weight-semibold); color: var(--color-text-primary); }
 .area-band { stroke: var(--color-surface); stroke-width: var(--stroke-hairline); transition: fill var(--motion-ui) var(--ease-out), opacity var(--motion-ui) var(--ease-out); }
 .brush .selection { fill: var(--color-text-primary); fill-opacity: var(--opacity-faint); stroke: var(--color-text-primary); stroke-opacity: var(--opacity-muted); shape-rendering: crispEdges; }
 .brush .handle { fill: var(--color-text-primary); fill-opacity: var(--opacity-subtle); }
