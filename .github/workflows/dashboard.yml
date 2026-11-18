@@ -42,6 +42,7 @@ jobs:
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           DASHBOARD_PRIVATE_KEY_PATH: ${{ runner.temp }}/reporter_key.p8
+          DASHBOARD_REQUIRE_LIVE: "1"
           DBT_TESTS_PASSED: ${{ github.event.client_payload.tests_passed }}
           DBT_TESTS_TOTAL: ${{ github.event.client_payload.tests_total }}
       - uses: actions/upload-pages-artifact@v3

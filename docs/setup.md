@@ -47,3 +47,5 @@ npm ci
 DASHBOARD_PYTHON=../.venv/bin/python DASHBOARD_PRIVATE_KEY_PATH=../keys/reporter_key.p8 SNOWFLAKE_ACCOUNT=<account> npm run dev
 ```
 The workflow `.github/workflows/dashboard.yml` can also be started by hand from the Actions tab.
+
+Every successful Snowflake pull is saved to `dashboard/snapshots/`, which is committed. If Snowflake can't be reached, the loaders serve the snapshot instead, so the page always has data locally; the "Data to" date in the header then shows how old it is. The workflow sets `DASHBOARD_REQUIRE_LIVE=1`, so a failed pull fails the build and the published page keeps its last good version. Commit the updated snapshots after a live run to keep the fallback current.
