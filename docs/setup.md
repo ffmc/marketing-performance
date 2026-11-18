@@ -34,18 +34,13 @@ python ingestion/load.py
 Airflow runs the whole chain once a day: simulate, load, refresh Silver, `dbt source freshness` and `dbt build`. When the build passes, it asks GitHub to rebuild the dashboard.
 
 ## Dashboard
-The dashboard in `dashboard/` is an Observable Framework site. Its Python data loaders query the GOLD marts as `REPORTER_USER` at build time, so the published page never connects to Snowflake.
+The dashboard in `dashboard/` is an Observable Framework site. Its Python data loaders query the GOLD marts as `REPORTER_USER`, save every successful pull to `dashboard/snapshots/`, and serve that snapshot when Snowflake can't be reached. The published page is built from the committed snapshots, so GitHub Actions needs no Snowflake secrets and the page never connects to Snowflake.
 
-One-time setup:
-1. Create `REPORTER_USER` with the block in `snowflake/setup.sql` (paste the contents of `keys/reporter_key.pub` without the BEGIN/END lines).
-2. In the GitHub repo settings, set Pages > Source to "GitHub Actions" and add two secrets: `SNOWFLAKE_ACCOUNT` and `REPORTER_PRIVATE_KEY` (the full contents of `keys/reporter_key.p8`).
-3. Create a fine-grained token for this repo with Contents: read and write, and put it in `.env` as `GITHUB_DISPATCH_TOKEN`. Restart the Airflow containers so they pick it up.
+The workflow `.github/workflows/dashboard.yml` deploys to GitHub Pages on every push to `main` that touches `dashboard/`, and can also be started by hand from the Actions tab. Pages > Source must be set to "GitHub Actions".
 
-Run it locally from `dashboard/`:
+To refresh the data, create `REPORTER_USER` with the block in `snowflake/setup.sql` (paste the contents of `keys/reporter_key.pub` without the BEGIN/END lines), run the dashboard locally against Snowflake, and commit the updated snapshots:
 ```bash
+cd dashboard
 npm ci
 DASHBOARD_PYTHON=../.venv/bin/python DASHBOARD_PRIVATE_KEY_PATH=../keys/reporter_key.p8 SNOWFLAKE_ACCOUNT=<account> npm run dev
 ```
-The workflow `.github/workflows/dashboard.yml` can also be started by hand from the Actions tab.
-
-Every successful Snowflake pull is saved to `dashboard/snapshots/`, which is committed. If Snowflake can't be reached, the loaders serve the snapshot instead, so the page always has data locally; the "Data to" date in the header then shows how old it is. The workflow sets `DASHBOARD_REQUIRE_LIVE=1`, so a failed pull fails the build and the published page keeps its last good version. Commit the updated snapshots after a live run to keep the fallback current.

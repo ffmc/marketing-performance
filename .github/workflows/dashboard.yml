@@ -1,6 +1,9 @@
 name: Dashboard
 
 on:
+  push:
+    branches: [main]
+    paths: [dashboard/**, .github/workflows/dashboard.yml]
   repository_dispatch:
     types: [dbt-success]
   workflow_dispatch:
@@ -32,17 +35,8 @@ jobs:
           python-version: "3.12"
       - run: pip install snowflake-connector-python
       - run: npm ci
-      - name: Write Snowflake key
-        run: |
-          printf '%s\n' "$REPORTER_PRIVATE_KEY" > "$RUNNER_TEMP/reporter_key.p8"
-          chmod 600 "$RUNNER_TEMP/reporter_key.p8"
-        env:
-          REPORTER_PRIVATE_KEY: ${{ secrets.REPORTER_PRIVATE_KEY }}
       - run: npm run build
         env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          DASHBOARD_PRIVATE_KEY_PATH: ${{ runner.temp }}/reporter_key.p8
-          DASHBOARD_REQUIRE_LIVE: "1"
           DBT_TESTS_PASSED: ${{ github.event.client_payload.tests_passed }}
           DBT_TESTS_TOTAL: ${{ github.event.client_payload.tests_total }}
       - uses: actions/upload-pages-artifact@v3
